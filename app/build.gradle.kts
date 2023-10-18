@@ -111,4 +111,6 @@ dependencies {
     implementation(libs.kotlin.serialization)
     implementation(libs.brotli.dec)
 
+    implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
 }
