@@ -28,7 +28,7 @@ import com.example.composedweather.R
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
 import kotlinx.coroutines.delay
 
-private const val SplashWaitTime: Long = 5000
+private const val SplashWaitTime: Long = 2000
 
 @Composable
 fun SplashUI(
