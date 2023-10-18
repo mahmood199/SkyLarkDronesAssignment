@@ -2,7 +2,7 @@ package com.example.composedweather.ui.feature.detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.composedweather.core.NetworkResult
+import com.example.composedweather.core.remote.NetworkResult
 import com.example.composedweather.data.repo.contract.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers

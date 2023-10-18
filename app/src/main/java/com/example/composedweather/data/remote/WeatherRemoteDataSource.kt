@@ -1,8 +1,8 @@
 package com.example.composedweather.data.remote
 
 import com.example.composedweather.BuildConfig
-import com.example.composedweather.core.NetworkResult
-import com.example.composedweather.core.ResponseProcessor
+import com.example.composedweather.core.remote.NetworkResult
+import com.example.composedweather.core.remote.ResponseProcessor
 import com.example.composedweather.data.models.WeatherResponse
 import com.google.gson.Gson
 import io.ktor.client.HttpClient

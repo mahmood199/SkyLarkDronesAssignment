@@ -1,4 +1,4 @@
-package com.example.composedweather.core
+package com.example.composedweather.core.remote
 
 import android.util.Log
 import com.example.composedweather.BuildConfig

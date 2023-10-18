@@ -1,4 +1,4 @@
-package com.example.composedweather.core
+package com.example.composedweather.core.remote
 
 sealed class NetworkResult<T : Any> {
     class Success<T: Any>(val data: T) : NetworkResult<T>()

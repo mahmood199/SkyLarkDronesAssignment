@@ -1,4 +1,4 @@
-package com.example.composedweather.core
+package com.example.composedweather.core.remote
 
 import com.google.gson.Gson
 import io.ktor.client.call.body

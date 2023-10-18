@@ -1,4 +1,4 @@
-package com.example.composedweather.core
+package com.example.composedweather.core.remote
 
 import io.ktor.client.plugins.compression.ContentEncoding
 
