@@ -18,8 +18,9 @@ dataStore-version = "1.0.0"
 hilt-version = "2.48"
 hilt-navigation-compose = "1.0.0"
 kotlin-serialization-version = "1.9.0"
-hilt-plugin = "2.41"
+hilt-plugin = "2.48"
 brotli-dec-version = "0.1.2"
+navigation-compose = "2.7.4"
 
 
 
@@ -41,6 +42,7 @@ material3 = { group = "androidx.compose.material3", name = "material3" }
 
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt-version" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt-version" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
 
 

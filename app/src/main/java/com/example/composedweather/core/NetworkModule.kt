@@ -9,7 +9,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
-import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.DEFAULT
@@ -33,60 +32,13 @@ import javax.inject.Singleton
 class NetworkModule {
 
     companion object {
-        val BASE_URL = BuildConfig.LAST_FM_BASE_URL
+        val BASE_URL = BuildConfig.OPEN_METEO_BASE_URL
         const val TIME_OUT = 10_000
     }
 
-    @Provides
-    @Singleton
-    @SaavnClient
-    fun provideSaavnClient() = HttpClient(Android) {
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                prettyPrint = true
-                isLenient = true
-                allowStructuredMapKeys = true
-            })
-        }
-
-
-        install(ContentEncoding) {
-            brotli()
-        }
-
-        engine {
-            connectTimeout = TIME_OUT
-            socketTimeout = TIME_OUT
-        }
-
-        install(ResponseObserver) {
-            onResponse { response ->
-                Log.d("Header:", response.headers.toString())
-                Log.d("Url:", response.request.url.toString())
-                Log.d("Method", response.request.method.value)
-                Log.d("Request:", response.request.content.toString())
-                Log.d("HTTP status:", "${response.status.value}")
-                Log.d("Response:", response.bodyAsText())
-            }
-        }
-
-        install(Logging) {
-            logger = Logger.DEFAULT
-            level = LogLevel.ALL
-        }
-
-        defaultRequest {
-            headers.append(
-                HttpHeaders.ContentType,
-                ContentType.Application.Json.toString()
-            )
-        }
-    }
 
     @Provides
     @Singleton
-    @LastFmClient
     fun provideLastFm() = HttpClient(Android) {
         install(ContentNegotiation) {
             json(Json {
@@ -119,7 +71,7 @@ class NetworkModule {
         }
 
         defaultRequest {
-            url(host =  BuildConfig.LAST_FM_BASE_URL) {
+            url(host =  BASE_URL) {
                 headers.append(
                     HttpHeaders.ContentType,
                     ContentType.Application.Json.toString()
@@ -129,8 +81,6 @@ class NetworkModule {
 
     }.apply {
         sendPipeline.intercept(HttpSendPipeline.State) {
-            context.headers.append("AppVersion", BuildConfig.VERSION_NAME)
-            context.parameter("api_key", BuildConfig.LAST_FM_API_KEY)
             context.parameter("format", "json")
         }
     }

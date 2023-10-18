@@ -27,11 +27,7 @@ android {
             useSupportLibrary = true
         }
 
-        buildConfigField("String", "LAST_FM_API_KEY", "\"9f0d1f4e45452f005252775976e4274c\"")
-        buildConfigField("String", "SHARED_API_KEY", "\"8e9162fd6f5930584a1adfa06507c3bb\"")
-        buildConfigField("String", "LAST_FM_BASE_URL", "\"https://ws.audioscrobbler.com/2.0/\"")
-
-        buildConfigField("String", "SAAVN_BASE_URL", "\"saavn.me/\"")
+        buildConfigField("String", "OPEN_METEO_BASE_URL", "\"https://api.open-meteo.com/v1/\"")
     }
 
     buildTypes {
@@ -61,6 +57,9 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+    kapt {
+        correctErrorTypes = true
     }
 }
 
@@ -95,6 +94,7 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.navigation.compose)
 
 
     implementation(libs.room.ktx)
