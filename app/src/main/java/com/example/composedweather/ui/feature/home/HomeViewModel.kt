@@ -1,4 +1,4 @@
-package com.example.composedweather.feature.detail
+package com.example.composedweather.ui.feature.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,13 +6,18 @@ import com.example.composedweather.core.NetworkResult
 import com.example.composedweather.data.repo.contract.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class DetailViewModel @Inject constructor(
+class HomeViewModel @Inject constructor(
     private val repository: WeatherRepository
 ) : ViewModel() {
+
+    private val _state = MutableStateFlow(HomeViewState())
+    val state = _state.asStateFlow()
 
     init {
         getInfo()
@@ -20,8 +25,8 @@ class DetailViewModel @Inject constructor(
 
     private fun getInfo() {
         viewModelScope.launch(Dispatchers.IO) {
+            _state.value = _state.value.copy(isLoading = true)
             val result = repository.getInfo()
-            val x = 13
             when (result) {
                 is NetworkResult.Exception -> {}
                 is NetworkResult.RedirectError -> {}
@@ -31,6 +36,7 @@ class DetailViewModel @Inject constructor(
                 }
                 is NetworkResult.UnAuthorised -> {}
             }
+            _state.value = _state.value.copy(isLoading = false)
         }
     }
 

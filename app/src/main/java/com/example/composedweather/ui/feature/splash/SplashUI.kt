@@ -1,4 +1,4 @@
-package com.example.composedweather.feature.splash
+package com.example.composedweather.ui.feature.splash
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -15,7 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
 import kotlinx.coroutines.delay
 
-private const val SplashWaitTime: Long = 1000
+private const val SplashWaitTime: Long = 2000
 
 @Composable
 fun SplashUI(

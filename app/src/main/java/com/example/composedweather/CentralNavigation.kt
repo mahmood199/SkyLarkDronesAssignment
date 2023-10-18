@@ -1,14 +1,15 @@
 package com.example.composedweather
 
+import androidx.compose.animation.fadeIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.composedweather.feature.detail.DetailUI
-import com.example.composedweather.feature.home.HomeUI
-import com.example.composedweather.feature.splash.SplashUI
+import com.example.composedweather.ui.feature.detail.DetailUI
+import com.example.composedweather.ui.feature.home.HomeUI
+import com.example.composedweather.ui.feature.splash.SplashUI
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
 
 @Composable
@@ -35,12 +36,31 @@ fun CentralNavigation(
             )
         }
 
-        composable(route = Screen.Home.name) {
-            HomeUI()
+        composable(
+            route = Screen.Home.name,
+            enterTransition = {
+                fadeIn()
+            }
+        ) {
+            HomeUI(
+                onBackPressed = {
+                    backPress()
+                },
+                navigateAhead = {
+                    navController.navigate(Screen.Detail.name)
+                }
+            )
         }
 
-        composable(route = Screen.Detail.name) {
-            DetailUI()
+        composable(
+            route = Screen.Detail.name,
+            enterTransition = {
+                fadeIn()
+            }
+        ) {
+            DetailUI(onBackPressed = {
+                navController.popBackStack()
+            })
         }
 
 
