@@ -65,7 +65,6 @@ class HomeViewModel @Inject constructor(
                     handleError(result.e)
                 }
 
-
                 is NetworkResult.UnAuthorised -> {
                     handleError(result.e)
                 }
@@ -73,6 +72,7 @@ class HomeViewModel @Inject constructor(
                 is NetworkResult.Success -> {
                     _state.value = _state.value.copy(isLoading = false)
 
+                    val x = result.data
                 }
             }
         }

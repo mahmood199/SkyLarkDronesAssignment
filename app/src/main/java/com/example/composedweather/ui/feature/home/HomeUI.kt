@@ -1,5 +1,6 @@
 package com.example.composedweather.ui.feature.home
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
@@ -39,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -145,20 +147,16 @@ fun HomeUI(
                     bottom = paddingValues.calculateBottomPadding()
                 )
         ) {
-            if (state.isLoading) {
-                ContentLoaderUI()
-            } else {
-                HomeUiContent(
-                    state = state,
-                    permissionState = permission,
-                    modifyContent = {
-                        viewModel.modifyContent(state = it)
-                    },
-                    navigateAhead = {
-                        navigateToSearch()
-                    }
-                )
-            }
+            HomeUiContent(
+                state = state,
+                permissionState = permission,
+                modifyContent = {
+                    viewModel.modifyContent(state = it)
+                },
+                navigateAhead = {
+                    navigateToSearch()
+                }
+            )
         }
     }
 }
@@ -206,7 +204,8 @@ fun HomeUiContent(
                     text = "Your location co-ordinates are: $latitude, $longitude",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .border(BorderStroke(2.dp, MaterialTheme.colorScheme.onPrimary))
+                        .clip(RoundedCornerShape(20))
+                        .border(BorderStroke(4.dp, MaterialTheme.colorScheme.onPrimary))
                         .padding(16.dp)
                 )
             }
@@ -216,51 +215,61 @@ fun HomeUiContent(
             text = "Enter your city name, state, country...",
             modifier = Modifier
                 .fillMaxWidth()
-                .border(BorderStroke(2.dp, MaterialTheme.colorScheme.onPrimary))
+                .clip(RoundedCornerShape(20))
+                .border(BorderStroke(4.dp, MaterialTheme.colorScheme.onPrimary))
                 .clickable {
                     navigateAhead()
                 }
                 .padding(16.dp)
         )
-        Column(
-            modifier = modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                text = "Content Loaded",
-                modifier = Modifier
-                    .padding(24.dp)
-            )
-            FilterChip(
-                shape = RoundedCornerShape(50),
-                selected = true,
-                onClick = {
-                    if (state.weatherDataRequest.temperatureUnit == Constants.CELSIUS)
-                        modifyContent(
-                            state.copy(
-                                weatherDataRequest = state.weatherDataRequest.copy(
-                                    temperatureUnit = Constants.FAHRENHEIT
-                                )
-                            )
-                        )
-                    else
-                        modifyContent(
-                            state.copy(
-                                weatherDataRequest = state.weatherDataRequest.copy(
-                                    temperatureUnit = Constants.CELSIUS
-                                )
-                            )
-                        )
-                },
-                label = {
+
+        AnimatedContent(targetState = state.isLoading, label = "Forecast loading") { isLoading ->
+            if(isLoading) {
+                 ContentLoaderUI()
+            } else {
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .background(Color.Blue),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                     Text(
-                        text = state.weatherDataRequest.temperatureUnit,
-                        modifier = Modifier.padding(4.dp)
+                        text = "Content Loaded",
+                        modifier = Modifier
+                            .padding(24.dp)
+                    )
+                    FilterChip(
+                        shape = RoundedCornerShape(50),
+                        selected = true,
+                        onClick = {
+                            if (state.weatherDataRequest.temperatureUnit == Constants.CELSIUS)
+                                modifyContent(
+                                    state.copy(
+                                        weatherDataRequest = state.weatherDataRequest.copy(
+                                            temperatureUnit = Constants.FAHRENHEIT
+                                        )
+                                    )
+                                )
+                            else
+                                modifyContent(
+                                    state.copy(
+                                        weatherDataRequest = state.weatherDataRequest.copy(
+                                            temperatureUnit = Constants.CELSIUS
+                                        )
+                                    )
+                                )
+                        },
+                        label = {
+                            Text(
+                                text = state.weatherDataRequest.temperatureUnit,
+                                modifier = Modifier.padding(4.dp)
+                            )
+                        }
                     )
                 }
-            )
+            }
         }
+
     }
 }
 

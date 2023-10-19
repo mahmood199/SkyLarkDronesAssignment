@@ -12,10 +12,10 @@ data class WeatherResponse(
     @SerialName("elevation") val elevation: Int,
 
 
-    @SerialName("hourly") val hourly: Hourly,
-    @SerialName("hourly_units") val hourlyUnits: HourlyUnits,
-    @SerialName("minutely_15") val minutely15: Minutely15,
-    @SerialName("minutely_15_units") val minutely15Units: Minutely15Units,
+    @SerialName("hourly") val hourly: Hourly?,
+    @SerialName("hourly_units") val hourlyUnits: HourlyUnits?,
+    @SerialName("minutely_15") val minutely15: Minutely15?,
+    @SerialName("minutely_15_units") val minutely15Units: Minutely15Units?,
     @SerialName("current") val current: Current?,
     @SerialName("current_units") val currentUnits: CurrentUnits?
 )
