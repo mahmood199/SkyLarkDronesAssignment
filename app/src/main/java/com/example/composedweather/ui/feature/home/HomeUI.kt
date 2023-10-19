@@ -16,8 +16,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -39,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.composedweather.data.models.request.Constants
 import com.example.composedweather.ui.common.ComposedWeatherAppBarUI
 import com.example.composedweather.ui.common.ContentLoaderUI
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
@@ -130,24 +134,71 @@ fun HomeUI(
             if (state.isLoading) {
                 ContentLoaderUI()
             } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.DarkGray),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Content Loaded",
-                        modifier = Modifier
-                            .padding(24.dp)
-                            .clickable {
-                                navigateAhead()
-                            }
-                    )
-                }
+                HomeUiContent(
+                    state = state,
+                    modifyContent = {
+                        viewModel.modifyContent(state = it)
+                    },
+                    navigateAhead = {
+                        navigateAhead()
+                    }
+                )
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeUiContent(
+    state: HomeViewState,
+    modifyContent: (HomeViewState) -> Unit,
+    navigateAhead: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Red),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Content Loaded",
+            modifier = Modifier
+                .padding(24.dp)
+                .clickable {
+                    navigateAhead()
+                }
+        )
+        FilterChip(
+            shape = RoundedCornerShape(50),
+            selected = true,
+            onClick = {
+                if (state.weatherDataRequest.temperatureUnit == Constants.CELSIUS)
+                    modifyContent(
+                        state.copy(
+                            weatherDataRequest = state.weatherDataRequest.copy(
+                                temperatureUnit = Constants.FAHRENHEIT
+                            )
+                        )
+                    )
+                else
+                    modifyContent(
+                        state.copy(
+                            weatherDataRequest = state.weatherDataRequest.copy(
+                                temperatureUnit = Constants.CELSIUS
+                            )
+                        )
+                    )
+            },
+            label = {
+                Text(
+                    text = state.weatherDataRequest.temperatureUnit,
+                    modifier = Modifier.padding(4.dp)
+                )
+            }
+        )
     }
 }
 

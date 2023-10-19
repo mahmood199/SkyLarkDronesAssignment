@@ -38,6 +38,7 @@ class PreferencesDataStore @Inject constructor(
                 temperatureUnit = temperatureUnit
             )
         }
+        //.distinctUntilChanged()
 
     suspend fun setUserLocation(latitude: Double, longitude: Double) {
         dataStore.edit { preferences ->
