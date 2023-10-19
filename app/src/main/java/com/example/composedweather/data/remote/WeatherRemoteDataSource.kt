@@ -3,7 +3,7 @@ package com.example.composedweather.data.remote
 import com.example.composedweather.BuildConfig
 import com.example.composedweather.core.remote.NetworkResult
 import com.example.composedweather.core.remote.ResponseProcessor
-import com.example.composedweather.data.models.request.ApiConstants
+import com.example.composedweather.data.models.request.Constants
 import com.example.composedweather.data.models.request.WeatherDataRequest
 import com.example.composedweather.data.models.response.WeatherResponse
 import com.google.gson.Gson
@@ -27,7 +27,7 @@ class WeatherRemoteDataSource @Inject constructor(
                 if(request.currentDayRequested) {
                     parameter("current", request.params)
                 }
-                parameter(ApiConstants.TEMPERATURE_UNIT, request.temperatureUnit)
+                parameter(Constants.TEMPERATURE_UNIT, request.temperatureUnit)
                 parameter("hourly", "temperature_2m")
                 parameter("hourly", "relativehumidity_2m")
                 parameter("hourly", "dewpoint_2m")

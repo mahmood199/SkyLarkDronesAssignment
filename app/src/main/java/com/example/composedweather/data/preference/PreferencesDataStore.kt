@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.stringPreferencesKey
+import com.example.composedweather.data.models.request.Constants
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -28,8 +30,13 @@ class PreferencesDataStore @Inject constructor(
         .map { preferences ->
             val latitude = preferences[PreferencesKeys.LATITUDE] ?: 0.0
             val longitude = preferences[PreferencesKeys.LONGITUDE] ?: 0.0
+            val temperatureUnit = preferences[PreferencesKeys.TEMPERATURE_UNIT] ?: Constants.CELSIUS
 
-            UserPreferences(latitude = latitude, longitude = longitude)
+            UserPreferences(
+                latitude = latitude,
+                longitude = longitude,
+                temperatureUnit = temperatureUnit
+            )
         }
 
     suspend fun setUserLocation(latitude: Double, longitude: Double) {
@@ -39,9 +46,16 @@ class PreferencesDataStore @Inject constructor(
         }
     }
 
+    suspend fun setTemperatureUnit(temperatureUnit: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TEMPERATURE_UNIT] = temperatureUnit
+        }
+    }
+
     private object PreferencesKeys {
         val LATITUDE = doublePreferencesKey("latitude")
         val LONGITUDE = doublePreferencesKey("longitude")
+        val TEMPERATURE_UNIT = stringPreferencesKey("temperature_unit")
     }
 
     companion object {

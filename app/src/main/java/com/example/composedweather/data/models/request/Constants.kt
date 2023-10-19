@@ -1,6 +1,6 @@
 package com.example.composedweather.data.models.request
 
-object ApiConstants {
+object Constants {
 
     const val FAHRENHEIT = "fahrenheit"
     const val CELSIUS = "celsius"

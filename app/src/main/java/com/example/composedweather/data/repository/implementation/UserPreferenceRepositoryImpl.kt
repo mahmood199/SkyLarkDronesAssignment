@@ -15,7 +15,11 @@ class UserPreferenceRepositoryImpl @Inject constructor(
     }
 
     override suspend fun setUserLocation(latitude: Double, longitude: Double) {
-        dataStore.setUserLocation(latitude, longitude)
+        dataStore.setUserLocation(latitude = latitude, longitude = longitude)
+    }
+
+    override suspend fun setTemperatureUnit(temperatureUnit: String) {
+        dataStore.setTemperatureUnit(temperatureUnit = temperatureUnit)
     }
 
 }
