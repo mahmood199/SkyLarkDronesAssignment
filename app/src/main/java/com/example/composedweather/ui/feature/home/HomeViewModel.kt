@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.composedweather.connection.NetworkConnectivityObserver
 import com.example.composedweather.core.remote.NetworkResult
-import com.example.composedweather.data.repo.contract.WeatherRepository
+import com.example.composedweather.data.repository.contract.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

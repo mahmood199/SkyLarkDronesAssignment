@@ -1,4 +1,4 @@
-package com.example.composedweather.data.repo.contract
+package com.example.composedweather.data.repository.contract
 
 import com.example.composedweather.core.remote.NetworkResult
 import com.example.composedweather.data.models.request.WeatherDataRequest
