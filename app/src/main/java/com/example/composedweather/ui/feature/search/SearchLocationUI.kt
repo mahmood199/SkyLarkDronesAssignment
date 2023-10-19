@@ -26,6 +26,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -76,6 +78,7 @@ fun DetailUI(
     }
 
     val context = LocalContext.current
+    val snackBarHostState = remember { SnackbarHostState() }
 
 
     LaunchedEffect(Unit) {
@@ -95,6 +98,7 @@ fun DetailUI(
                     focusManager.clearFocus()
                 }
             },
+        snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
             ComposedWeatherAppBarUI(
                 title = "Search Location",
@@ -103,6 +107,21 @@ fun DetailUI(
             )
         }
     ) { paddingValues ->
+
+
+        LaunchedEffect(state.error) {
+            if (state.error != null) {
+                val message = if (state.isConnected.not()) "Please connect to a stable network" else state.error
+                    ?: "Something went wrong.\n Please try again later."
+                Toast.makeText(
+                    context,
+                    message,
+                    Toast.LENGTH_SHORT
+                ).show()
+                viewModel.resetError()
+            }
+        }
+
         Column(
             modifier = Modifier
                 .padding(top = paddingValues.calculateTopPadding())
@@ -165,15 +184,16 @@ fun DetailUI(
                 } else {
                     SearchResultContentUI(
                         query = query,
+                        state = state,
                         searchResult = searchResult,
                         onItemSelected = { item ->
                             viewModel.setLocationCoordinates(
                                 locationResponseItem = item
                             )
                             Toast.makeText(
-                                context, "Location Selected: ${item.lat.take(4)}, ${
+                                context, "Location Selected: ${item.lat.take(5)}, ${
                                     item.lon.take(
-                                        4
+                                        5
                                     )
                                 }", Toast.LENGTH_SHORT
                             ).show()
@@ -189,12 +209,13 @@ fun DetailUI(
 @Composable
 fun SearchResultContentUI(
     query: String,
+    state: SearchLocationViewState,
     searchResult: SnapshotStateList<LocationResponseItem>,
     onItemSelected: (LocationResponseItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (query.isNotEmpty()) {
-        if(searchResult.isEmpty()) {
+        if (searchResult.isEmpty() && state.isInSearchMode) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -206,7 +227,7 @@ fun SearchResultContentUI(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-        } else {
+        } else if (searchResult.isNotEmpty()) {
             LazyColumn(
                 modifier = modifier
                     .fillMaxSize(),

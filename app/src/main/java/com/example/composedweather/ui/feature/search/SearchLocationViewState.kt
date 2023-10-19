@@ -2,6 +2,7 @@ package com.example.composedweather.ui.feature.search
 
 data class SearchLocationViewState(
     val isLoading: Boolean = false,
-    val error: String? = null,
-    val landed: Boolean = true
+    var error: String? = null,
+    val isInSearchMode: Boolean = false,
+    val isConnected: Boolean = false
 )
