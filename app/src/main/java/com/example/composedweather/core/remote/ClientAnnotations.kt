@@ -7,11 +7,11 @@ import javax.inject.Qualifier
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
-annotation class PrimaryClient
+annotation class WeatherClient
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)
-annotation class SecondaryClient
+annotation class LocationClient
 
 @Qualifier
 @Retention(AnnotationRetention.RUNTIME)

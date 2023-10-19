@@ -28,6 +28,7 @@ android {
         }
 
         buildConfigField("String", "OPEN_METEO_BASE_URL", "\"https://api.open-meteo.com/v1/\"")
+        buildConfigField("String", "NOMINATIM_BASE_URL", "\"https://nominatim.openstreetmap.org/\"")
     }
 
     buildTypes {
@@ -113,4 +114,9 @@ dependencies {
 
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
+
+
+    implementation(libs.play.services.location)
+    implementation(libs.accompanist.permissions)
+
 }

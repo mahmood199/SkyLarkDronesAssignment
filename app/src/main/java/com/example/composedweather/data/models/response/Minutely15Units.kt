@@ -1,4 +1,4 @@
-package com.example.composedweather.data.models
+package com.example.composedweather.data.models.response
 
 import kotlinx.serialization.SerialName
 

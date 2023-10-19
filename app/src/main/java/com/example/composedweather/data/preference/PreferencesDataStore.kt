@@ -1,0 +1,69 @@
+package com.example.composedweather.data.preference
+
+import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.stringPreferencesKey
+import com.example.composedweather.data.models.request.Constants
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import java.io.IOException
+import javax.inject.Inject
+
+class PreferencesDataStore @Inject constructor(
+    private val dataStore: DataStore<Preferences>
+) {
+
+    val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                Log.e("PreferencesDataStore", exception.toString())
+                emit(emptyPreferences())
+            } else {
+                throw Exception()
+            }
+        }
+        .map { preferences ->
+            val latitude = preferences[PreferencesKeys.LATITUDE] ?: 0.0
+            val longitude = preferences[PreferencesKeys.LONGITUDE] ?: 0.0
+            val temperatureUnit = preferences[PreferencesKeys.TEMPERATURE_UNIT] ?: Constants.CELSIUS
+            val locationName = preferences[PreferencesKeys.LOCATION_NAME] ?: ""
+
+            UserPreferences(
+                latitude = latitude,
+                longitude = longitude,
+                temperatureUnit = temperatureUnit,
+                location = locationName
+            )
+        }
+
+    suspend fun setUserLocation(latitude: Double, longitude: Double, userLocation: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LATITUDE] = latitude
+            preferences[PreferencesKeys.LONGITUDE] = longitude
+            preferences[PreferencesKeys.LOCATION_NAME] = userLocation
+        }
+    }
+
+    suspend fun setTemperatureUnit(temperatureUnit: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TEMPERATURE_UNIT] = temperatureUnit
+        }
+    }
+
+    private object PreferencesKeys {
+        val LATITUDE = doublePreferencesKey("latitude")
+        val LONGITUDE = doublePreferencesKey("longitude")
+        val TEMPERATURE_UNIT = stringPreferencesKey("temperature_unit")
+        val LOCATION_NAME = stringPreferencesKey("location_name")
+    }
+
+    companion object {
+        const val USER_PREFERENCES_NAME = "user_preferences"
+    }
+
+}
