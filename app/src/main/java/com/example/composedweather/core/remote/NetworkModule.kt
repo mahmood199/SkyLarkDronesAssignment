@@ -39,7 +39,8 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    fun provideLastFm() = HttpClient(Android) {
+    @WeatherClient
+    fun provideWeatherClient() = HttpClient(Android) {
         install(ContentNegotiation) {
             json(Json {
                 prettyPrint = true
@@ -82,6 +83,41 @@ class NetworkModule {
     }.apply {
         sendPipeline.intercept(HttpSendPipeline.State) {
             context.parameter("format", "json")
+        }
+    }
+
+    @Provides
+    @Singleton
+    @LocationClient
+    fun provideLocationClient() = HttpClient(Android) {
+        install(ContentNegotiation) {
+            json(Json {
+                prettyPrint = true
+                isLenient = true
+                ignoreUnknownKeys = true
+                allowStructuredMapKeys = true
+            })
+        }
+
+        engine {
+            connectTimeout = TIME_OUT
+            socketTimeout = TIME_OUT
+        }
+
+        install(ResponseObserver) {
+            onResponse { response ->
+                Log.d("Header:", response.headers.toString())
+                Log.d("Url:", response.request.url.toString())
+                Log.d("Method", response.request.method.value)
+                Log.d("Request:", response.request.content.toString())
+                Log.d("HTTP status:", "${response.status.value}")
+                Log.d("Response:", response.bodyAsText())
+            }
+        }
+
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.ALL
         }
     }
 

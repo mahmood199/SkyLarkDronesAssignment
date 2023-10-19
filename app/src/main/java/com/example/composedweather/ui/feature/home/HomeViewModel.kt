@@ -54,31 +54,33 @@ class HomeViewModel @Inject constructor(
             _state.value = _state.value.copy(isLoading = true)
             when (val result = weatherRepository.getInfo(state.value.weatherDataRequest)) {
                 is NetworkResult.Exception -> {
-                    _state.value = _state.value.copy(error = result.e.message)
-                    _state.value = _state.value.copy(isLoading = false)
+                    handleError(result.e)
                 }
 
                 is NetworkResult.RedirectError -> {
-                    _state.value = _state.value.copy(error = result.e.message)
-                    _state.value = _state.value.copy(isLoading = false)
+                    handleError(result.e)
                 }
 
                 is NetworkResult.ServerError -> {
-                    _state.value = _state.value.copy(error = result.e.message)
-                    _state.value = _state.value.copy(isLoading = false)
+                    handleError(result.e)
+                }
+
+
+                is NetworkResult.UnAuthorised -> {
+                    handleError(result.e)
                 }
 
                 is NetworkResult.Success -> {
                     _state.value = _state.value.copy(isLoading = false)
 
                 }
-
-                is NetworkResult.UnAuthorised -> {
-                    _state.value = _state.value.copy(error = result.e.message)
-                    _state.value = _state.value.copy(isLoading = false)
-                }
             }
         }
+    }
+
+    private fun handleError(e: Throwable) {
+        _state.value = _state.value.copy(error = e.message)
+        _state.value = _state.value.copy(isLoading = false)
     }
 
     fun modifyContent(state: HomeViewState) {

@@ -31,19 +31,21 @@ class PreferencesDataStore @Inject constructor(
             val latitude = preferences[PreferencesKeys.LATITUDE] ?: 0.0
             val longitude = preferences[PreferencesKeys.LONGITUDE] ?: 0.0
             val temperatureUnit = preferences[PreferencesKeys.TEMPERATURE_UNIT] ?: Constants.CELSIUS
+            val locationName = preferences[PreferencesKeys.LOCATION_NAME] ?: ""
 
             UserPreferences(
                 latitude = latitude,
                 longitude = longitude,
-                temperatureUnit = temperatureUnit
+                temperatureUnit = temperatureUnit,
+                location = locationName
             )
         }
-        //.distinctUntilChanged()
 
-    suspend fun setUserLocation(latitude: Double, longitude: Double) {
+    suspend fun setUserLocation(latitude: Double, longitude: Double, userLocation: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.LATITUDE] = latitude
             preferences[PreferencesKeys.LONGITUDE] = longitude
+            preferences[PreferencesKeys.LOCATION_NAME] = userLocation
         }
     }
 
@@ -57,6 +59,7 @@ class PreferencesDataStore @Inject constructor(
         val LATITUDE = doublePreferencesKey("latitude")
         val LONGITUDE = doublePreferencesKey("longitude")
         val TEMPERATURE_UNIT = stringPreferencesKey("temperature_unit")
+        val LOCATION_NAME = stringPreferencesKey("location_name")
     }
 
     companion object {

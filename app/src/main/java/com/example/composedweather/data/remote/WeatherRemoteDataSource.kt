@@ -2,6 +2,7 @@ package com.example.composedweather.data.remote
 
 import com.example.composedweather.BuildConfig
 import com.example.composedweather.core.remote.NetworkResult
+import com.example.composedweather.core.remote.WeatherClient
 import com.example.composedweather.core.remote.ResponseProcessor
 import com.example.composedweather.data.models.request.Constants
 import com.example.composedweather.data.models.request.WeatherDataRequest
@@ -13,7 +14,7 @@ import io.ktor.client.request.parameter
 import javax.inject.Inject
 
 class WeatherRemoteDataSource @Inject constructor(
-    private val httpClient: HttpClient,
+    @WeatherClient private val httpClient: HttpClient,
     private val responseProcessor: ResponseProcessor,
     private val gson: Gson
 ) {

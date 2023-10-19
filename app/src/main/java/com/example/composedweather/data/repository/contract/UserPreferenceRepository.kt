@@ -7,8 +7,8 @@ interface UserPreferenceRepository {
 
     fun getUserPreferences(): Flow<UserPreferences>
 
-    suspend fun setUserLocation(latitude: Double, longitude: Double)
-
     suspend fun setTemperatureUnit(temperatureUnit: String)
+
+    suspend fun setUserLocation(latitude: Double, longitude: Double, location: String)
 
 }

@@ -7,7 +7,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -45,13 +48,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.composedweather.data.models.request.Constants
 import com.example.composedweather.ui.common.ComposedWeatherAppBarUI
 import com.example.composedweather.ui.common.ContentLoaderUI
+import com.example.composedweather.ui.common.SaveableLaunchedEffect
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun HomeUI(
     onBackPressed: () -> Unit,
-    navigateAhead: () -> Unit,
+    navigateToSearch: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
 
@@ -62,12 +71,16 @@ fun HomeUI(
         mutableStateOf(false)
     }
 
+    val permission = rememberPermissionState(
+        android.Manifest.permission.ACCESS_COARSE_LOCATION,
+    )
+
     val color by animateColorAsState(
         targetValue = if (state.isConnected) Color.Green else Color.DarkGray,
         label = "Bottom UI BG color"
     )
 
-    LaunchedEffect(state.isConnected) {
+    SaveableLaunchedEffect(state.isConnected) {
         isShowing = true
         delay(2000)
         isShowing = false
@@ -128,19 +141,21 @@ fun HomeUI(
                 .padding(
                     start = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
                     end = paddingValues.calculateStartPadding(LayoutDirection.Ltr),
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = paddingValues.calculateBottomPadding()
                 )
-                .background(Color.Green)
         ) {
             if (state.isLoading) {
                 ContentLoaderUI()
             } else {
                 HomeUiContent(
                     state = state,
+                    permissionState = permission,
                     modifyContent = {
                         viewModel.modifyContent(state = it)
                     },
                     navigateAhead = {
-                        navigateAhead()
+                        navigateToSearch()
                     }
                 )
             }
@@ -148,57 +163,104 @@ fun HomeUI(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun HomeUiContent(
     state: HomeViewState,
+    permissionState: PermissionState,
     modifyContent: (HomeViewState) -> Unit,
     navigateAhead: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    SaveableLaunchedEffect(Unit) {
+        permissionState.launchPermissionRequest()
+    }
+
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .background(Color.Red),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .padding(horizontal = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        when (permissionState.status) {
+            is PermissionStatus.Denied -> {
+                Text(
+                    text = "Please allow location access from settings",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(BorderStroke(2.dp, MaterialTheme.colorScheme.onPrimary))
+                        .padding(16.dp)
+                )
+            }
+
+            PermissionStatus.Granted -> {
+                val latitude = remember(state.weatherDataRequest.latitude) {
+                    state.weatherDataRequest.latitude.toString().take(5)
+                }
+
+                val longitude = remember(state.weatherDataRequest.longitude) {
+                    state.weatherDataRequest.longitude.toString().take(5)
+                }
+
+                Text(
+                    text = "Your location co-ordinates are: $latitude, $longitude",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(BorderStroke(2.dp, MaterialTheme.colorScheme.onPrimary))
+                        .padding(16.dp)
+                )
+            }
+        }
+
         Text(
-            text = "Content Loaded",
+            text = "Enter your city name, state, country...",
             modifier = Modifier
-                .padding(24.dp)
+                .fillMaxWidth()
+                .border(BorderStroke(2.dp, MaterialTheme.colorScheme.onPrimary))
                 .clickable {
                     navigateAhead()
                 }
+                .padding(16.dp)
         )
-        FilterChip(
-            shape = RoundedCornerShape(50),
-            selected = true,
-            onClick = {
-                if (state.weatherDataRequest.temperatureUnit == Constants.CELSIUS)
-                    modifyContent(
-                        state.copy(
-                            weatherDataRequest = state.weatherDataRequest.copy(
-                                temperatureUnit = Constants.FAHRENHEIT
+        Column(
+            modifier = modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "Content Loaded",
+                modifier = Modifier
+                    .padding(24.dp)
+            )
+            FilterChip(
+                shape = RoundedCornerShape(50),
+                selected = true,
+                onClick = {
+                    if (state.weatherDataRequest.temperatureUnit == Constants.CELSIUS)
+                        modifyContent(
+                            state.copy(
+                                weatherDataRequest = state.weatherDataRequest.copy(
+                                    temperatureUnit = Constants.FAHRENHEIT
+                                )
                             )
                         )
-                    )
-                else
-                    modifyContent(
-                        state.copy(
-                            weatherDataRequest = state.weatherDataRequest.copy(
-                                temperatureUnit = Constants.CELSIUS
+                    else
+                        modifyContent(
+                            state.copy(
+                                weatherDataRequest = state.weatherDataRequest.copy(
+                                    temperatureUnit = Constants.CELSIUS
+                                )
                             )
                         )
+                },
+                label = {
+                    Text(
+                        text = state.weatherDataRequest.temperatureUnit,
+                        modifier = Modifier.padding(4.dp)
                     )
-            },
-            label = {
-                Text(
-                    text = state.weatherDataRequest.temperatureUnit,
-                    modifier = Modifier.padding(4.dp)
-                )
-            }
-        )
+                }
+            )
+        }
     }
 }
 
@@ -208,7 +270,7 @@ fun HomeUIPreview() {
     ComposedWeatherTheme {
         HomeUI(
             onBackPressed = {},
-            navigateAhead = {}
+            navigateToSearch = {}
         )
     }
 }

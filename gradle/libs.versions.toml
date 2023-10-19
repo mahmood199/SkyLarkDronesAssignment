@@ -1,5 +1,6 @@
 [versions]
 agp = "8.3.0-alpha07"
+accompanist-permission = "0.32.0"
 coil-compose = "2.4.0"
 kotlin = "1.9.0"
 core-ktx = "1.12.0"
@@ -11,6 +12,7 @@ activity-compose = "1.8.0"
 compose-bom = "2023.10.00"
 ktor = "2.3.2"
 ktor-gson = "1.5.0"
+playServicesLocation = "21.0.1"
 serialization-json = "1.5.1"
 room-version = "2.6.0-rc01"
 paging-version = "3.2.1"
@@ -33,6 +35,7 @@ espresso-core = { group = "androidx.test.espresso", name = "espresso-core", vers
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -67,6 +70,7 @@ datastore-preferences = { group = "androidx.datastore", name = "datastore-prefer
 hilt-android-gradle-plugin = { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "hilt-version" }
 kotlin-serialization = { group = "org.jetbrains.kotlin", name = "kotlin-serialization", version.ref = "kotlin-serialization-version" }
 brotli-dec = { group = "org.brotli", name = "dec", version.ref = "brotli-dec-version" }
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist-permission" }
 
 
 landscapist-glide = { group = "com.github.skydoves", name = "landscapist-glide", version.ref = "glide-version" }

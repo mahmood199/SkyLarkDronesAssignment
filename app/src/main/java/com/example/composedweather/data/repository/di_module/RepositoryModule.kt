@@ -1,9 +1,13 @@
 package com.example.composedweather.data.repository.di_module
 
+import com.example.composedweather.data.location.LocationLocalDataSource
 import com.example.composedweather.data.preference.PreferencesDataStore
+import com.example.composedweather.data.remote.LocationRemoteDataSource
 import com.example.composedweather.data.remote.WeatherRemoteDataSource
+import com.example.composedweather.data.repository.contract.LocationRepository
 import com.example.composedweather.data.repository.contract.UserPreferenceRepository
 import com.example.composedweather.data.repository.contract.WeatherRepository
+import com.example.composedweather.data.repository.implementation.LocationRepositoryImpl
 import com.example.composedweather.data.repository.implementation.UserPreferenceRepositoryImpl
 import com.example.composedweather.data.repository.implementation.WeatherRepositoryImpl
 import dagger.Module
@@ -36,5 +40,16 @@ class RepositoryModule {
         )
     }
 
+    @Provides
+    @Singleton
+    fun provideLocationRepository(
+        localDataSource: LocationLocalDataSource,
+        remoteDataSource: LocationRemoteDataSource,
+    ): LocationRepository {
+        return LocationRepositoryImpl(
+            localDataSource = localDataSource,
+            remoteDataSource = remoteDataSource
+        )
+    }
 
 }

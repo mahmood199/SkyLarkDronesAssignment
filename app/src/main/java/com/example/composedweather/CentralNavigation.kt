@@ -7,7 +7,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.composedweather.ui.feature.detail.DetailUI
+import com.example.composedweather.ui.feature.search.DetailUI
 import com.example.composedweather.ui.feature.home.HomeUI
 import com.example.composedweather.ui.feature.splash.SplashUI
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
@@ -46,7 +46,7 @@ fun CentralNavigation(
                 onBackPressed = {
                     backPress()
                 },
-                navigateAhead = {
+                navigateToSearch = {
                     navController.navigate(Screen.Detail.name)
                 }
             )
