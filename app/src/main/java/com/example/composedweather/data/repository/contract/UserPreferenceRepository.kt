@@ -9,6 +9,10 @@ interface UserPreferenceRepository {
 
     suspend fun setTemperatureUnit(temperatureUnit: String)
 
-    suspend fun setUserLocation(latitude: Double, longitude: Double, location: String)
-
+    suspend fun setUserLocation(
+        latitude: Double,
+        longitude: Double,
+        location: String,
+        isLocationDetected: Boolean
+    )
 }

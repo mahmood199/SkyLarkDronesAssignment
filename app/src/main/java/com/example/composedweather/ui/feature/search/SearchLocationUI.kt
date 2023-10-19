@@ -58,6 +58,7 @@ import com.example.composedweather.data.models.response.LocationResponseItem
 import com.example.composedweather.ui.common.ComposedWeatherAppBarUI
 import com.example.composedweather.ui.common.ContentLoaderUI
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
+import java.text.DecimalFormat
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -186,16 +187,12 @@ fun DetailUI(
                         query = query,
                         state = state,
                         searchResult = searchResult,
-                        onItemSelected = { item ->
+                        onItemSelected = { item, latitude, longitude ->
                             viewModel.setLocationCoordinates(
                                 locationResponseItem = item
                             )
                             Toast.makeText(
-                                context, "Location Selected: ${item.lat.take(5)}, ${
-                                    item.lon.take(
-                                        5
-                                    )
-                                }", Toast.LENGTH_SHORT
+                                context, "Location Selected: $latitude , $longitude", Toast.LENGTH_SHORT
                             ).show()
                             onBackPressed()
                         }
@@ -211,7 +208,7 @@ fun SearchResultContentUI(
     query: String,
     state: SearchLocationViewState,
     searchResult: SnapshotStateList<LocationResponseItem>,
-    onItemSelected: (LocationResponseItem) -> Unit,
+    onItemSelected: (LocationResponseItem, String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (query.isNotEmpty()) {
@@ -248,8 +245,8 @@ fun SearchResultContentUI(
                     val item = searchResult[index]
                     LocationItem(
                         item = item,
-                        onItemClicked = { locationResponseItem ->
-                            onItemSelected(locationResponseItem)
+                        onItemClicked = { locationResponseItem, latitude, longitude ->
+                            onItemSelected(locationResponseItem, latitude, longitude)
                         }
                     )
                 }
@@ -273,16 +270,25 @@ fun SearchResultContentUI(
 @Composable
 fun LocationItem(
     item: LocationResponseItem,
-    onItemClicked: (LocationResponseItem) -> Unit,
+    onItemClicked: (LocationResponseItem, String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    val latitude = remember(item.lat) {
+        DecimalFormat("#.##").format(item.lat.toDouble())
+    }
+
+    val longitude = remember(item.lon) {
+        DecimalFormat("#.##").format(item.lon.toDouble())
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10))
             .background(MaterialTheme.colorScheme.tertiaryContainer)
             .clickable {
-                onItemClicked(item)
+                onItemClicked(item, latitude, longitude)
             }
             .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -300,13 +306,14 @@ fun LocationItem(
             text = "Area Type: ${item.addressType}, ${item.type}",
             modifier = Modifier.fillMaxWidth()
         )
+
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "Latitude: ${item.lat.take(5)}",
+                text = "Latitude: $latitude",
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = "Longitude: ${item.lon.take(5)}",
+                text = "Longitude: $longitude",
                 modifier = Modifier.weight(1f),
             )
         }

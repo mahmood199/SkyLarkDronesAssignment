@@ -73,9 +73,10 @@ class SearchLocationViewModel @Inject constructor(
     fun setLocationCoordinates(locationResponseItem: LocationResponseItem) {
         viewModelScope.launch(Dispatchers.IO) {
             userPreferenceRepository.setUserLocation(
-                latitude = locationResponseItem.lat.take(6).toDoubleOrNull() ?: 0.0,
-                longitude = locationResponseItem.lon.take(6).toDoubleOrNull() ?: 0.0,
-                location = locationResponseItem.displayName
+                latitude = locationResponseItem.lat.toDoubleOrNull() ?: 0.0,
+                longitude = locationResponseItem.lon.toDoubleOrNull() ?: 0.0,
+                location = locationResponseItem.displayName,
+                isLocationDetected = false
             )
         }
     }

@@ -10,5 +10,6 @@ data class WeatherDataRequest(
     val pastDays: Int = 0,
     val startDate: String = "",
     val endDate: String = "",
-    val currentDayRequested: Boolean = false
+    val currentDayRequested: Boolean = false,
+    val isLocationDetected: Boolean = false
 )

@@ -40,7 +40,8 @@ class HomeViewModel @Inject constructor(
                     weatherDataRequest = request.copy(
                         latitude = it.latitude,
                         longitude = it.longitude,
-                        temperatureUnit = it.temperatureUnit
+                        temperatureUnit = it.temperatureUnit,
+                        isLocationDetected = it.isLocationDetected
                     )
                 )
 
@@ -71,8 +72,6 @@ class HomeViewModel @Inject constructor(
 
                 is NetworkResult.Success -> {
                     _state.value = _state.value.copy(isLoading = false)
-
-                    val x = result.data
                 }
             }
         }
@@ -87,6 +86,21 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             userPreferenceRepository.setTemperatureUnit(state.weatherDataRequest.temperatureUnit)
         }
+    }
+
+    fun setLocationCoordinates(latitude: Double, longitude: Double) {
+        viewModelScope.launch(Dispatchers.IO) {
+            userPreferenceRepository.setUserLocation(
+                latitude = latitude,
+                longitude = longitude,
+                location = "Your current location",
+                isLocationDetected = true
+            )
+        }
+    }
+
+    fun handleLocationError() {
+        _state.value = _state.value.copy(error = "Unable for fetch location")
     }
 
 
