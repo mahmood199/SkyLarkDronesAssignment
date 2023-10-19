@@ -23,14 +23,19 @@ class HomeViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            networkConnectivityObserver.networkState.collectLatest {
+                _state.value = _state.value.copy(isConnected = it)
+            }
+        }
+
         getInfo()
     }
 
     private fun getInfo() {
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = _state.value.copy(isLoading = true)
-            val result = repository.getInfo()
-            when (result) {
+            when (val result = repository.getInfo(state.value.weatherDataRequest)) {
                 is NetworkResult.Exception -> {
                     _state.value = _state.value.copy(error = result.e.message)
                     _state.value = _state.value.copy(isLoading = false)
@@ -51,12 +56,6 @@ class HomeViewModel @Inject constructor(
                     _state.value = _state.value.copy(error = result.e.message)
                     _state.value = _state.value.copy(isLoading = false)
                 }
-            }
-        }
-
-        viewModelScope.launch {
-            networkConnectivityObserver.networkState.collectLatest {
-                _state.value = _state.value.copy(isConnected = it)
             }
         }
     }
