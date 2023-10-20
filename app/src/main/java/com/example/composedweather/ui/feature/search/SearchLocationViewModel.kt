@@ -3,25 +3,22 @@ package com.example.composedweather.ui.feature.search
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.composedweather.connection.NetworkConnectivityObserver
 import com.example.composedweather.core.remote.NetworkResult
 import com.example.composedweather.data.models.response.LocationResponseItem
 import com.example.composedweather.data.repository.contract.LocationRepository
 import com.example.composedweather.data.repository.contract.UserPreferenceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-@OptIn(FlowPreview::class)
 class SearchLocationViewModel @Inject constructor(
+    private val networkConnectivityObserver: NetworkConnectivityObserver,
     private val locationRepository: LocationRepository,
     private val userPreferenceRepository: UserPreferenceRepository
 ) : ViewModel() {
@@ -34,11 +31,20 @@ class SearchLocationViewModel @Inject constructor(
 
     var searchResults = mutableStateListOf<LocationResponseItem>()
 
+    init {
+        viewModelScope.launch {
+            networkConnectivityObserver.networkState.collectLatest {
+                _state.value = _state.value.copy(isConnected = it)
+            }
+        }
+    }
+
     fun updateSearchQuery(it: String) {
         _query.value = it
         if(it.isEmpty()) {
             searchResults.clear()
         }
+        _state.value = _state.value.copy(isInSearchMode = false)
     }
 
     fun searchLocation() {
@@ -55,7 +61,7 @@ class SearchLocationViewModel @Inject constructor(
                     searchResults.addAll(result.data)
                 }
             }
-            _state.value = _state.value.copy(isLoading = false, landed = false)
+            _state.value = _state.value.copy(isLoading = false, isInSearchMode = true)
         }
     }
 
@@ -67,12 +73,16 @@ class SearchLocationViewModel @Inject constructor(
     fun setLocationCoordinates(locationResponseItem: LocationResponseItem) {
         viewModelScope.launch(Dispatchers.IO) {
             userPreferenceRepository.setUserLocation(
-                latitude = locationResponseItem.lat.take(6).toDoubleOrNull() ?: 0.0,
-                longitude = locationResponseItem.lon.take(6).toDoubleOrNull() ?: 0.0,
-                location = locationResponseItem.displayName
+                latitude = locationResponseItem.lat.toDoubleOrNull() ?: 0.0,
+                longitude = locationResponseItem.lon.toDoubleOrNull() ?: 0.0,
+                location = locationResponseItem.displayName,
+                isLocationDetected = false
             )
         }
     }
 
+    fun resetError() {
+        _state.value = _state.value.copy(error = null)
+    }
 
 }

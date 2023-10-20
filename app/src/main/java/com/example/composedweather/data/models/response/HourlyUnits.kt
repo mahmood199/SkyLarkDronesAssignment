@@ -1,10 +1,9 @@
 package com.example.composedweather.data.models.response
 
-import kotlinx.serialization.SerialName
+import com.google.gson.annotations.SerializedName
 
 data class HourlyUnits(
-    @SerialName("dewpoint_2m") val dewpoint2m: String,
-    @SerialName("relativehumidity_2m") val relativeHumidity2m: String,
-    @SerialName("temperature_2m") val temperature2m: String,
-    @SerialName("time") val time: String
+    @SerializedName("relativehumidity_2m") val relativeHumidity2m: String,
+    @SerializedName("temperature_2m") val temperature2m: String,
+    @SerializedName("time") val time: String
 )

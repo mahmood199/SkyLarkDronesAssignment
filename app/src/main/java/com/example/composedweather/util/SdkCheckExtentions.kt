@@ -1,4 +1,4 @@
-package com.example.composedweather.ext
+package com.example.composedweather.util
 
 import android.os.Build
 import android.os.Build.VERSION

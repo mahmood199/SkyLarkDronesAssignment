@@ -26,6 +26,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,6 +58,7 @@ import com.example.composedweather.data.models.response.LocationResponseItem
 import com.example.composedweather.ui.common.ComposedWeatherAppBarUI
 import com.example.composedweather.ui.common.ContentLoaderUI
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
+import java.text.DecimalFormat
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -76,6 +79,7 @@ fun DetailUI(
     }
 
     val context = LocalContext.current
+    val snackBarHostState = remember { SnackbarHostState() }
 
 
     LaunchedEffect(Unit) {
@@ -95,6 +99,7 @@ fun DetailUI(
                     focusManager.clearFocus()
                 }
             },
+        snackbarHost = { SnackbarHost(snackBarHostState) },
         topBar = {
             ComposedWeatherAppBarUI(
                 title = "Search Location",
@@ -103,6 +108,21 @@ fun DetailUI(
             )
         }
     ) { paddingValues ->
+
+
+        LaunchedEffect(state.error) {
+            if (state.error != null) {
+                val message = if (state.isConnected.not()) "Please connect to a stable network" else state.error
+                    ?: "Something went wrong.\n Please try again later."
+                Toast.makeText(
+                    context,
+                    message,
+                    Toast.LENGTH_SHORT
+                ).show()
+                viewModel.resetError()
+            }
+        }
+
         Column(
             modifier = Modifier
                 .padding(top = paddingValues.calculateTopPadding())
@@ -165,17 +185,14 @@ fun DetailUI(
                 } else {
                     SearchResultContentUI(
                         query = query,
+                        state = state,
                         searchResult = searchResult,
-                        onItemSelected = { item ->
+                        onItemSelected = { item, latitude, longitude ->
                             viewModel.setLocationCoordinates(
                                 locationResponseItem = item
                             )
                             Toast.makeText(
-                                context, "Location Selected: ${item.lat.take(4)}, ${
-                                    item.lon.take(
-                                        4
-                                    )
-                                }", Toast.LENGTH_SHORT
+                                context, "Location Selected: $latitude , $longitude", Toast.LENGTH_SHORT
                             ).show()
                             onBackPressed()
                         }
@@ -189,12 +206,13 @@ fun DetailUI(
 @Composable
 fun SearchResultContentUI(
     query: String,
+    state: SearchLocationViewState,
     searchResult: SnapshotStateList<LocationResponseItem>,
-    onItemSelected: (LocationResponseItem) -> Unit,
+    onItemSelected: (LocationResponseItem, String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (query.isNotEmpty()) {
-        if(searchResult.isEmpty()) {
+        if (searchResult.isEmpty() && state.isInSearchMode) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -206,7 +224,7 @@ fun SearchResultContentUI(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-        } else {
+        } else if (searchResult.isNotEmpty()) {
             LazyColumn(
                 modifier = modifier
                     .fillMaxSize(),
@@ -227,8 +245,8 @@ fun SearchResultContentUI(
                     val item = searchResult[index]
                     LocationItem(
                         item = item,
-                        onItemClicked = { locationResponseItem ->
-                            onItemSelected(locationResponseItem)
+                        onItemClicked = { locationResponseItem, latitude, longitude ->
+                            onItemSelected(locationResponseItem, latitude, longitude)
                         }
                     )
                 }
@@ -252,16 +270,25 @@ fun SearchResultContentUI(
 @Composable
 fun LocationItem(
     item: LocationResponseItem,
-    onItemClicked: (LocationResponseItem) -> Unit,
+    onItemClicked: (LocationResponseItem, String, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    val latitude = remember(item.lat) {
+        DecimalFormat("#.##").format(item.lat.toDouble())
+    }
+
+    val longitude = remember(item.lon) {
+        DecimalFormat("#.##").format(item.lon.toDouble())
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10))
             .background(MaterialTheme.colorScheme.tertiaryContainer)
             .clickable {
-                onItemClicked(item)
+                onItemClicked(item, latitude, longitude)
             }
             .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -279,13 +306,14 @@ fun LocationItem(
             text = "Area Type: ${item.addressType}, ${item.type}",
             modifier = Modifier.fillMaxWidth()
         )
+
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "Latitude: ${item.lat.take(5)}",
+                text = "Latitude: $latitude",
                 modifier = Modifier.weight(1f),
             )
             Text(
-                text = "Longitude: ${item.lon.take(5)}",
+                text = "Longitude: $longitude",
                 modifier = Modifier.weight(1f),
             )
         }

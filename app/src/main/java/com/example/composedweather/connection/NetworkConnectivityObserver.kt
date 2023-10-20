@@ -9,7 +9,7 @@ import android.os.Build
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
-import com.example.composedweather.ext.isAtLeastVersion
+import com.example.composedweather.util.isAtLeastVersion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
