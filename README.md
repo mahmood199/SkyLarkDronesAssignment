@@ -28,6 +28,29 @@ In your `local.properties` you will need to add your Open Weather API key and co
 - Kotlin version >= 1.9.0
 
 
+# Technologies 🔨
+
+**Language :** [Kotlin](https://github.com/JetBrains/kotlin)
+
+**Libraries :**
+  *UI*
+- [Compose](https://developer.android.com/jetpack/compose)
+- [Coil](https://coil-kt.github.io/coil/compose/https://coil-kt.github.io/coil/compose/) 
+- [Landscapist](https://github.com/skydoves/landscapist) 
+
+  *Data*
+- [Ktor](https://square.github.io/retrofit/)
+- [Gson](https://github.com/google/gson)
+- [Preference Data Store](https://developer.android.com/topic/libraries/architecture/datastore)
+- [Fused Location Provider](https://developers.google.com/location-context/fused-location-provider/)
+- 
+
+   *Tooling/Project setup*
+- [Gradle secrets plugin](https://github.com/google/secrets-gradle-plugin)
+- [Hilt(DI)](https://developer.android.com/training/dependency-injection/hilt-android)
+
+
+
 # Screenshots 📱
 
 |                         Home(Celsius, Current Info, Hourly Forecast, 10 days Forecast)                          |
