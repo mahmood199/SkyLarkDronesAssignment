@@ -1,5 +1,3 @@
-# ComposedWeather
-
 Summary
 
 A simple weather app that gets your location or you search for location and displays the forecast for that day and a few days after that. Also it shows various other metrics like humidity, temperature, rain and precipitation.
@@ -34,22 +32,25 @@ In your `local.properties` you will need to add your Open Weather API key and co
 
 |                         Home(Celsius, Current Info, Hourly Forecast, 10 days Forecast)                          |
 |:---------------------------------------------------------:|
-| <img src="https://drive.google.com/file/d/11RcSgkwLNiz-X5c92YJyYMHulVhE7yj2/view" width="300px"> |
+| <img src="![Screenshot_2023-10-20-08-24-40-494_com example composedweather (1)](https://github.com/mahmood199/ComposedWeather/assets/58071934/cbc9f724-d6bb-4932-aeb3-08df3a41bc9a)
+" width="200px"> |
 
 
 |                         Home(Celsius, Current Info, 10 days Forecast)                          |
 |:---------------------------------------------------------:|
-| <img src="https://drive.google.com/file/d/11Y6OQyfw2i7FvHWgawGdJuDA_rsmb4O4/view" width="300px"> |
+| <img src="![Screenshot_2023-10-20-08-24-45-509_com example composedweather](https://github.com/mahmood199/ComposedWeather/assets/58071934/3ab0bf43-faeb-43b3-b500-21e785e0d1a7)
+" width="300px"> |
 
 
 |                         Home(Celsius, 10 days Forecast)                           |
 |:---------------------------------------------------------:|
-| <img src="https://drive.google.com/file/d/11_SYTd0Qu3GV1hk0ZZfreoOmoF2GSGyU/view" width="300px"> |
+| <img src="![Screenshot_2023-10-20-08-24-49-885_com example composedweather](https://github.com/mahmood199/ComposedWeather/assets/58071934/7875f7ac-253b-4e76-a3e3-bed15e452210)
+" width="300px"> |
 
 
 |                         Search(With Search Result)                          |
 |:---------------------------------------------------------:|
-| <img src="https://drive.google.com/file/d/11Y6OQyfw2i7FvHWgawGdJuDA_rsmb4O4/view" width="300px"> |
+| <img src="![Screenshot_2023-10-20-08-25-24-296_com example composedweather](https://github.com/mahmood199/ComposedWeather/assets/58071934/095685ae-e527-4bd4-9787-e619bf9c10b4)" width="300px> |
 
 
 |                         Recording of the App Flow                        |
