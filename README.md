@@ -43,12 +43,45 @@ In your `local.properties` you will need to add your Open Weather API key and co
 - [Gson](https://github.com/google/gson)
 - [Preference Data Store](https://developer.android.com/topic/libraries/architecture/datastore)
 - [Fused Location Provider](https://developers.google.com/location-context/fused-location-provider/)
-- 
 
    *Tooling/Project setup*
 - [Gradle secrets plugin](https://github.com/google/secrets-gradle-plugin)
 - [Hilt(DI)](https://developer.android.com/training/dependency-injection/hilt-android)
 
+
+# Design/Architectural decisions 📐
+
+The project follows common android patterns in modern android codebases. 
+P.S - The modularization of this can result in better codebase structure.
+
+**Project Structure**
+
+The folders are split into 5 boundaries:
+ - **Connection**:
+   Contains the classes that are required for keeping an eye on mobile network connectivity. This in itself can be a separate module for identifying and observing device connectivity events.
+
+ - **Core**:
+   Contains the classes that are required for platform specific code. Like setting up network client, user Preferences. Basically this is the inner most layer of data.
+
+ - **Data**:
+   This package contains models, data sources, both local or remote and repositories as well. All data related actions and formatting happens in this layer as well.
+   It also contains framework related dependencies to co-ordinate and create instances of data stores like a database or shared preference etc.
+   The repository pattern, is used, which mediates data sources and acts as a source of truth to the consumer.
+
+ - **UI**:
+
+   This is the presentation layer of the app.
+   This is further divided into 3 parts.
+   1. common - UI that is common and can be used across app with minor changes. Eg:- Toolbar
+   2. feature - each screen is considered to be a feature. Each feature has a UI, viewModel and a viewState which is observed my the UI.
+   3. theme - Base theming of the application
+
+   Each feature has a UI, viewmodel and a viewState which is observed my the UI. The UI just observes the state and reacts to the changes. It doesn't directly change the state. It request viewmodel to changes the state and react accordingly. Thus maitaining single source of truth. The state observed by UI is a stateFlow of an immutable type. Stateflow ensures that out app has the latest updated data.
+   
+   Some design patterns that can be seen here are the Observer pattern when consuming the flow -> state flows in the composables and provides a reactive app.
+
+ - **Util**:
+   Contains the extension functions for routine task like date formatting and SDK checks.
 
 
 # Screenshots 📱
@@ -80,6 +113,16 @@ In your `local.properties` you will need to add your Open Weather API key and co
 |:---------------------------------------------------------:|
 https://drive.google.com/file/d/11Q_j8K_mQI8fsHnHib5gTmrk3UzfIj9I/view
 
+
+# Improvements 🚀
+As for every other project there is always some room for improvement.
+Additio of these were not possible due to time constraints.
+Things that are worth adding
+1. Modularization.
+2. Testing.
+3. Adding UseCase as an intermediate between viewModel and repository.
+4. Add corresponding UI model class for each remote model class
+5. Add Mappers for local and remote model classes.
 
 # LICENSE
 
