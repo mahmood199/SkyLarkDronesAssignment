@@ -10,10 +10,9 @@ data class WeatherResponse(
     @SerializedName("timezone") val timezone: String,
     @SerializedName("timezone_abbreviation") val timezoneAbbreviation: String,
     @SerializedName("elevation") val elevation: Int,
-    @SerializedName("hourly") val hourly: Hourly?,
-    @SerializedName("hourly_units") val hourlyUnits: HourlyUnits?,
 
-
+    @SerializedName("hourly") val hourly: Hourly,
+    @SerializedName("hourly_units") val hourlyUnits: HourlyUnits,
     @SerializedName("current") val current: Current,
     @SerializedName("current_units") val currentUnits: CurrentUnits,
     @SerializedName("daily") val daily: Daily,

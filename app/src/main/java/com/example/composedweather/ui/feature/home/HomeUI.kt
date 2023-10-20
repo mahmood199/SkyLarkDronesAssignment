@@ -50,6 +50,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -67,10 +68,12 @@ import com.example.composedweather.data.models.request.Constants
 import com.example.composedweather.data.models.response.Current
 import com.example.composedweather.data.models.response.CurrentUnits
 import com.example.composedweather.data.models.response.DailyForecast
+import com.example.composedweather.data.models.response.HourlyForecast
 import com.example.composedweather.ui.common.ComposedWeatherAppBarUI
 import com.example.composedweather.ui.common.ContentLoaderUI
 import com.example.composedweather.ui.common.SaveableLaunchedEffect
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
+import com.example.composedweather.util.formatToAMPM
 import com.example.composedweather.util.formatToDMMMY
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
@@ -94,7 +97,8 @@ fun HomeUI(
     val state by viewModel.state.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
 
-    val dailyForecast = viewModel.dailyForecasts
+    val dailyForecasts = viewModel.dailyForecasts
+    val hourlyForecasts = viewModel.hourlyForecasts
 
     val todayWeather by viewModel.currentDayWeather.collectAsState()
 
@@ -168,8 +172,9 @@ fun HomeUI(
         LaunchedEffect(state.error) {
             if (state.error != null) {
                 val result = snackBarHostState.showSnackbar(
-                    message = if
-                                      (state.isConnected.not()) "Please connect to a stable network"
+                    message =
+                    if (state.isConnected.not())
+                        "Please connect to a stable network"
                     else
                         state.error ?: "Something went wrong",
                     withDismissAction = true,
@@ -199,7 +204,8 @@ fun HomeUI(
             HomeUiContent(
                 state = state,
                 permissionState = permission,
-                dailyForecast = dailyForecast,
+                hourlyForecasts = hourlyForecasts,
+                dailyForecasts = dailyForecasts,
                 todayWeather = todayWeather,
                 modifyContent = {
                     viewModel.modifyState(state = it)
@@ -230,7 +236,8 @@ fun HomeUI(
 fun HomeUiContent(
     state: HomeViewState,
     permissionState: PermissionState,
-    dailyForecast: SnapshotStateList<DailyForecast>,
+    dailyForecasts: SnapshotStateList<DailyForecast>,
+    hourlyForecasts: SnapshotStateList<HourlyForecast>,
     todayWeather: Pair<Current, CurrentUnits>?,
     modifyContent: (HomeViewState) -> Unit,
     onPermissionGranted: () -> Unit,
@@ -314,7 +321,8 @@ fun HomeUiContent(
                     PermissionStatus.Granted -> {
                         WeatherContentUI(
                             state = state,
-                            dailyForecast = dailyForecast,
+                            hourlyForecasts = hourlyForecasts,
+                            dailyForecasts = dailyForecasts,
                             modifyContent = modifyContent,
                             todayWeather = todayWeather
                         )
@@ -328,7 +336,8 @@ fun HomeUiContent(
 @Composable
 fun WeatherContentUI(
     state: HomeViewState,
-    dailyForecast: SnapshotStateList<DailyForecast>,
+    hourlyForecasts: SnapshotStateList<HourlyForecast>,
+    dailyForecasts: SnapshotStateList<DailyForecast>,
     todayWeather: Pair<Current, CurrentUnits>?,
     modifyContent: (HomeViewState) -> Unit,
     modifier: Modifier = Modifier
@@ -338,15 +347,23 @@ fun WeatherContentUI(
             .fillMaxSize(),
     ) {
 
-        var showTodaysInfo by remember {
+        var showTodaysInfo by rememberSaveable {
+            mutableStateOf(true)
+        }
+
+        var showHourlyForecast by rememberSaveable {
             mutableStateOf(true)
         }
 
         Filters(
             state = state,
             showTodaysInfo = showTodaysInfo,
-            modifyTodaysWeatherVisibility = {
+            showHourlyForecast = showHourlyForecast,
+            toggleTodaysWeatherVisibility = {
                 showTodaysInfo = showTodaysInfo.not()
+            },
+            toggleHourlyForecast = {
+                showHourlyForecast = showHourlyForecast.not()
             },
             modifyContent = modifyContent
         )
@@ -373,6 +390,23 @@ fun WeatherContentUI(
             }
 
             item(
+                key = "HourlyForecast",
+                contentType = {
+                    "HourlyForecastRow"
+                }
+            ) {
+                AnimatedVisibility(
+                    visible = showHourlyForecast,
+                    label = "Hourly Forecast Row"
+                ) {
+                    HourlyForecastRow(
+                        hourlyForecasts = hourlyForecasts,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+            }
+
+            item(
                 key = "WeeklyForecastHeader123",
                 contentType = {
                     "Weekly Forecast Header"
@@ -386,17 +420,82 @@ fun WeatherContentUI(
                 )
             }
             items(
-                count = dailyForecast.size,
+                count = dailyForecasts.size,
                 key = { index ->
-                    dailyForecast[index].time + index
+                    dailyForecasts[index].time + index
                 },
                 contentType = {
                     "Weekly Forecast Info"
                 }
             ) { index ->
-                DailyWeatherItem(dailyForecast[index])
+                DailyWeatherItem(dailyForecasts[index])
             }
         }
+    }
+}
+
+@Composable
+fun HourlyForecastRow(
+    hourlyForecasts: SnapshotStateList<HourlyForecast>,
+    modifier: Modifier = Modifier
+) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = modifier.fillMaxWidth().animateContentSize(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        item(key = "HourlyForeCast Start Item") {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text("Time")
+                Text("Temperature")
+                Text("Humidity")
+            }
+        }
+        items(
+            count = hourlyForecasts.size,
+            key = { index ->
+                hourlyForecasts[index].time +
+                        hourlyForecasts[index].temperature +
+                        hourlyForecasts[index].relativeHumidity
+            }, contentType = {
+                "Hourly Forecast Item"
+            }
+        ) { index ->
+            HourlyForecastItem(
+                hourlyForecast = hourlyForecasts[index],
+            )
+        }
+    }
+}
+
+@Composable
+fun HourlyForecastItem(
+    hourlyForecast: HourlyForecast,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+
+        val time = remember(hourlyForecast) {
+            hourlyForecast.time.formatToAMPM()
+        }
+
+        val temperature = remember(hourlyForecast) {
+            "${hourlyForecast.temperature}${hourlyForecast.temperatureUnit}"
+        }
+
+        val relativeHumidity = remember(hourlyForecast) {
+            "${hourlyForecast.relativeHumidity}${hourlyForecast.relativeHumidityUnit}"
+        }
+
+        Text(text = time)
+        Text(text = temperature)
+        Text(text = relativeHumidity)
     }
 }
 
@@ -445,13 +544,15 @@ fun TodayWeatherItem(
 fun Filters(
     state: HomeViewState,
     showTodaysInfo: Boolean,
-    modifyTodaysWeatherVisibility: () -> Unit,
+    showHourlyForecast: Boolean,
+    toggleTodaysWeatherVisibility: () -> Unit,
+    toggleHourlyForecast: () -> Unit,
     modifyContent: (HomeViewState) -> Unit
 ) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item(key = "TemperatureUnit") {
+        item(key = "TemperatureUnitToggle") {
             FilterItem(
                 text = state.weatherDataRequest.temperatureUnit,
                 action = {
@@ -474,12 +575,23 @@ fun Filters(
                 }
             )
         }
-        item(key = "TodaysWeather") {
+
+        item(key = "TodaysWeatherToggle") {
             FilterItem(
                 text = "Today",
                 enabled = showTodaysInfo,
                 action = {
-                    modifyTodaysWeatherVisibility()
+                    toggleTodaysWeatherVisibility()
+                }
+            )
+        }
+
+        item(key = "HourlyForeCastToggle") {
+            FilterItem(
+                text = "Hourly",
+                enabled = showHourlyForecast,
+                action = {
+                    toggleHourlyForecast()
                 }
             )
         }

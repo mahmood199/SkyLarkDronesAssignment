@@ -6,7 +6,7 @@ data class WeatherDataRequest(
     val longitude: Double = 0.0,
     val params: List<String> = emptyList(),
     val temperatureUnit: String = Constants.CELSIUS,
-    val forecastDays: Int = 5,
+    val forecastDays: Int = 10,
     val pastDays: Int = 0,
     val startDate: String = "",
     val endDate: String = "",

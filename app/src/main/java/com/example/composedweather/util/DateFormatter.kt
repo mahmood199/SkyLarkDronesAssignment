@@ -16,3 +16,17 @@ fun String.formatToDMMMY(): String {
         "Error"
     }
 }
+
+@SuppressLint("SimpleDateFormat")
+fun String.formatToAMPM(): String {
+    val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm")
+    val outputFormat = SimpleDateFormat("ha")
+
+    return try {
+        val date = inputFormat.parse(this)
+        return outputFormat.format(date)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        "Error"
+    }
+}

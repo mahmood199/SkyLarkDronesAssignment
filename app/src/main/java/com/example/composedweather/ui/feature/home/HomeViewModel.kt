@@ -11,6 +11,9 @@ import com.example.composedweather.data.models.response.CurrentUnits
 import com.example.composedweather.data.models.response.Daily
 import com.example.composedweather.data.models.response.DailyUnits
 import com.example.composedweather.data.models.response.DailyForecast
+import com.example.composedweather.data.models.response.Hourly
+import com.example.composedweather.data.models.response.HourlyForecast
+import com.example.composedweather.data.models.response.HourlyUnits
 import com.example.composedweather.data.repository.contract.UserPreferenceRepository
 import com.example.composedweather.data.repository.contract.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,8 +36,10 @@ class HomeViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     val dailyForecasts = mutableStateListOf<DailyForecast>()
+    val hourlyForecasts = mutableStateListOf<HourlyForecast>()
 
-    private val _currrentDayWeather: MutableStateFlow<Pair<Current, CurrentUnits>?> = MutableStateFlow(null)
+    private val _currrentDayWeather: MutableStateFlow<Pair<Current, CurrentUnits>?> =
+        MutableStateFlow(null)
     val currentDayWeather = _currrentDayWeather.asStateFlow()
 
 
@@ -103,9 +108,25 @@ class HomeViewModel @Inject constructor(
                 is NetworkResult.Success -> {
                     getDayWiseForecast(result.data.daily, result.data.dailyUnits)
                     getWeatherForToday(result.data.current, result.data.currentUnits)
+                    getHourlyForecasts(result.data.hourly, result.data.hourlyUnits)
+
                     _state.value = _state.value.copy(isLoading = false)
                 }
             }
+        }
+    }
+
+    private fun getHourlyForecasts(hourly: Hourly, hourlyUnits: HourlyUnits) {
+        hourlyForecasts.clear()
+        // Taking only 24 hours forecast
+        hourly.time.take(24).forEachIndexed { index, s ->
+            hourlyForecasts.add(
+                HourlyForecast(
+                    hourly.relativeHumidity2m[index], hourlyUnits.relativeHumidity2m,
+                    hourly.temperature2m[index], hourlyUnits.temperature2m,
+                    hourly.time[index], hourlyUnits.time,
+                )
+            )
         }
     }
 
