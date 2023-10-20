@@ -2,8 +2,6 @@ package com.example.composedweather.ui.common
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,9 +20,9 @@ import com.example.composedweather.ui.theme.ComposedWeatherTheme
 @Composable
 fun ComposedWeatherAppBarUI(
     title: String,
-    backButtonIcon: ImageVector,
     onBackPressed: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    backButtonIcon: ImageVector? = null
 ) {
     TopAppBar(
         title = {
@@ -32,11 +30,13 @@ fun ComposedWeatherAppBarUI(
                 modifier = Modifier.padding(horizontal = 0.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onBackPressed) {
-                    Icon(
-                        imageVector = backButtonIcon,
-                        contentDescription = "TopBar Icon",
-                    )
+                if (backButtonIcon != null) {
+                    IconButton(onBackPressed) {
+                        Icon(
+                            imageVector = backButtonIcon,
+                            contentDescription = "TopBar Icon",
+                        )
+                    }
                 }
                 Text(text = title)
             }
@@ -52,7 +52,7 @@ fun ComposedWeatherAppBarUIPreview() {
     ComposedWeatherTheme {
         ComposedWeatherAppBarUI(
             title = "Home",
-            backButtonIcon = Icons.Default.ArrowBack,
+            backButtonIcon = null,
             onBackPressed = {}
         )
     }

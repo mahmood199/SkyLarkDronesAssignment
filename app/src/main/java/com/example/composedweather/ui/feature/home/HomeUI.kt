@@ -15,21 +15,28 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -44,21 +51,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.composedweather.data.models.request.Constants
+import com.example.composedweather.data.models.response.Current
+import com.example.composedweather.data.models.response.CurrentUnits
+import com.example.composedweather.data.models.response.DailyForecast
 import com.example.composedweather.ui.common.ComposedWeatherAppBarUI
 import com.example.composedweather.ui.common.ContentLoaderUI
 import com.example.composedweather.ui.common.SaveableLaunchedEffect
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
+import com.example.composedweather.util.formatToDMMMY
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
@@ -81,6 +94,10 @@ fun HomeUI(
     val state by viewModel.state.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
 
+    val dailyForecast = viewModel.dailyForecasts
+
+    val todayWeather by viewModel.currentDayWeather.collectAsState()
+
     var isShowing by remember {
         mutableStateOf(false)
     }
@@ -96,18 +113,35 @@ fun HomeUI(
 
     SaveableLaunchedEffect(state.isConnected) {
         isShowing = true
-        delay(2000)
+        delay(1000)
         isShowing = false
     }
 
     Scaffold(
         topBar = {
             ComposedWeatherAppBarUI(
-                title = "Home Screen",
+                title = "Home",
                 onBackPressed = onBackPressed,
-                backButtonIcon = Icons.Default.ArrowBack
             )
         },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    navigateToSearch()
+                },
+                shape = RoundedCornerShape(25),
+                containerColor = Color.DarkGray,
+                elevation = FloatingActionButtonDefaults.elevation(12.dp),
+                modifier = Modifier
+                    .padding(end = 8.dp, bottom = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Navigate to Search"
+                )
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End,
         snackbarHost = { SnackbarHost(snackBarHostState) },
         bottomBar = {
             AnimatedVisibility(
@@ -165,11 +199,10 @@ fun HomeUI(
             HomeUiContent(
                 state = state,
                 permissionState = permission,
+                dailyForecast = dailyForecast,
+                todayWeather = todayWeather,
                 modifyContent = {
-                    viewModel.modifyContent(state = it)
-                },
-                navigateAhead = {
-                    navigateToSearch()
+                    viewModel.modifyState(state = it)
                 },
                 onPermissionGranted = {
                     fusedLocationProviderClient.lastLocation
@@ -190,7 +223,6 @@ fun HomeUI(
 }
 
 @OptIn(
-    ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class,
     ExperimentalFoundationApi::class
 )
@@ -198,8 +230,9 @@ fun HomeUI(
 fun HomeUiContent(
     state: HomeViewState,
     permissionState: PermissionState,
+    dailyForecast: SnapshotStateList<DailyForecast>,
+    todayWeather: Pair<Current, CurrentUnits>?,
     modifyContent: (HomeViewState) -> Unit,
-    navigateAhead: () -> Unit,
     onPermissionGranted: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -208,10 +241,10 @@ fun HomeUiContent(
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         when (permissionState.status) {
             is PermissionStatus.Denied -> {
@@ -248,33 +281,27 @@ fun HomeUiContent(
                     else "Showing forecasts for Lat:- $latitude, Lon:- $longitude"
                 }
 
-                Text(
-                    text = textToShow,
-                    maxLines = 1,
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .basicMarquee(100)
                         .clip(RoundedCornerShape(20))
                         .border(BorderStroke(4.dp, MaterialTheme.colorScheme.onPrimary))
                         .padding(16.dp)
-                )
+                ) {
+                    Text(
+                        text = textToShow,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .basicMarquee(100)
+                    )
+                }
             }
         }
 
-        Text(
-            text = "Enter your city name, state, country...",
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20))
-                .border(BorderStroke(4.dp, MaterialTheme.colorScheme.onPrimary))
-                .clickable {
-                    navigateAhead()
-                }
-                .padding(16.dp)
-        )
-
         AnimatedContent(
-            targetState = state.isLoading, label = "Forecast loading"
+            targetState = state.isLoading,
+            label = "Forecast loading"
         ) { isLoading ->
             if (isLoading) {
                 ContentLoaderUI()
@@ -285,49 +312,280 @@ fun HomeUiContent(
                     }
 
                     PermissionStatus.Granted -> {
-                        Column(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .background(Color.Blue),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            Text(
-                                text = "Content Loaded",
-                                modifier = Modifier
-                                    .padding(24.dp)
-                            )
-                            FilterChip(
-                                shape = RoundedCornerShape(50),
-                                selected = true,
-                                onClick = {
-                                    if (state.weatherDataRequest.temperatureUnit == Constants.CELSIUS)
-                                        modifyContent(
-                                            state.copy(
-                                                weatherDataRequest = state.weatherDataRequest.copy(
-                                                    temperatureUnit = Constants.FAHRENHEIT
-                                                )
-                                            )
-                                        )
-                                    else
-                                        modifyContent(
-                                            state.copy(
-                                                weatherDataRequest = state.weatherDataRequest.copy(
-                                                    temperatureUnit = Constants.CELSIUS
-                                                )
-                                            )
-                                        )
-                                },
-                                label = {
-                                    Text(
-                                        text = state.weatherDataRequest.temperatureUnit,
-                                        modifier = Modifier.padding(4.dp)
-                                    )
-                                }
-                            )
-                        }
+                        WeatherContentUI(
+                            state = state,
+                            dailyForecast = dailyForecast,
+                            modifyContent = modifyContent,
+                            todayWeather = todayWeather
+                        )
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun WeatherContentUI(
+    state: HomeViewState,
+    dailyForecast: SnapshotStateList<DailyForecast>,
+    todayWeather: Pair<Current, CurrentUnits>?,
+    modifyContent: (HomeViewState) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize(),
+    ) {
+
+        var showTodaysInfo by remember {
+            mutableStateOf(true)
+        }
+
+        Filters(
+            state = state,
+            showTodaysInfo = showTodaysInfo,
+            modifyTodaysWeatherVisibility = {
+                showTodaysInfo = showTodaysInfo.not()
+            },
+            modifyContent = modifyContent
+        )
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(vertical = 12.dp)
+        ) {
+            item(
+                key = "TodaysWeatherInfo",
+                contentType = {
+                    "TodaysWeatherContent"
+                }
+            ) {
+                AnimatedVisibility(
+                    visible = (todayWeather != null && showTodaysInfo),
+                    label = "Today Weather Header"
+                ) {
+                    todayWeather?.let {
+                        TodayWeatherItem(it)
+                    }
+                }
+            }
+
+            item(
+                key = "WeeklyForecastHeader123",
+                contentType = {
+                    "Weekly Forecast Header"
+                }
+            ) {
+                Text(
+                    text = "Weekly Forecast",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(6.dp)
+                )
+            }
+            items(
+                count = dailyForecast.size,
+                key = { index ->
+                    dailyForecast[index].time + index
+                },
+                contentType = {
+                    "Weekly Forecast Info"
+                }
+            ) { index ->
+                DailyWeatherItem(dailyForecast[index])
+            }
+        }
+    }
+}
+
+@Composable
+fun TodayWeatherItem(
+    todayWeather: Pair<Current, CurrentUnits>,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .animateContentSize()
+            .clip(RoundedCornerShape(12))
+            .background(MaterialTheme.colorScheme.inversePrimary)
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        val current = remember(todayWeather) {
+            todayWeather.first
+        }
+        val currentUnits = remember(todayWeather) {
+            todayWeather.second
+        }
+
+        Text(
+            text = "Currently",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold
+        )
+
+        Text(
+            text = "${current.apparent_temperature}${currentUnits.apparent_temperature}",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.ExtraBold
+        )
+
+        Text(
+            text = "Feels like ${current.temperature_2m}${currentUnits.temperature_2m}",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.ExtraBold
+        )
+    }
+}
+
+@Composable
+fun Filters(
+    state: HomeViewState,
+    showTodaysInfo: Boolean,
+    modifyTodaysWeatherVisibility: () -> Unit,
+    modifyContent: (HomeViewState) -> Unit
+) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item(key = "TemperatureUnit") {
+            FilterItem(
+                text = state.weatherDataRequest.temperatureUnit,
+                action = {
+                    if (state.weatherDataRequest.temperatureUnit == Constants.CELSIUS)
+                        modifyContent(
+                            state.copy(
+                                weatherDataRequest = state.weatherDataRequest.copy(
+                                    temperatureUnit = Constants.FAHRENHEIT
+                                )
+                            )
+                        )
+                    else
+                        modifyContent(
+                            state.copy(
+                                weatherDataRequest = state.weatherDataRequest.copy(
+                                    temperatureUnit = Constants.CELSIUS
+                                )
+                            )
+                        )
+                }
+            )
+        }
+        item(key = "TodaysWeather") {
+            FilterItem(
+                text = "Today",
+                enabled = showTodaysInfo,
+                action = {
+                    modifyTodaysWeatherVisibility()
+                }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FilterItem(
+    text: String,
+    action: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    FilterChip(
+        shape = RoundedCornerShape(50),
+        selected = enabled,
+        onClick = {
+            action()
+        },
+        label = {
+            Text(
+                text = text,
+                modifier = Modifier.padding(4.dp)
+            )
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
+fun DailyWeatherItem(
+    dailyForecast: DailyForecast,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10))
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        val date = remember {
+            dailyForecast.time.formatToDMMMY()
+        }
+
+        val temperatureMax = remember {
+            "Max ${dailyForecast.temperature2mMax}${dailyForecast.temperature2mMaxUnit}"
+        }
+
+        val temperatureMin = remember {
+            "Min ${dailyForecast.temperature2mMin}${dailyForecast.temperature2mMinUnit}"
+        }
+
+
+        val precipitationHours = remember {
+            "Rain around ${dailyForecast.precipitationHours}hrs"
+        }
+
+        val precipitation = remember {
+            "Rainfall - ${dailyForecast.precipitationSum}${dailyForecast.precipitationSumUnit}"
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(2f),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = date,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = precipitation,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Text(
+                text = precipitationHours,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = temperatureMax,
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = temperatureMin,
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

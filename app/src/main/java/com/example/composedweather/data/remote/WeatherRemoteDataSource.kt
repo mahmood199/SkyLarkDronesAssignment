@@ -2,8 +2,8 @@ package com.example.composedweather.data.remote
 
 import com.example.composedweather.BuildConfig
 import com.example.composedweather.core.remote.NetworkResult
-import com.example.composedweather.core.remote.WeatherClient
 import com.example.composedweather.core.remote.ResponseProcessor
+import com.example.composedweather.core.remote.WeatherClient
 import com.example.composedweather.data.models.request.Constants
 import com.example.composedweather.data.models.request.WeatherDataRequest
 import com.example.composedweather.data.models.response.WeatherResponse
@@ -22,16 +22,30 @@ class WeatherRemoteDataSource @Inject constructor(
     suspend fun getWeatherForecast(request: WeatherDataRequest): NetworkResult<WeatherResponse> {
         return try {
             val response = httpClient.get(BuildConfig.OPEN_METEO_BASE_URL + "forecast") {
-                parameter("latitude", 52.52)
-                parameter("longitude", 13.41)
-                parameter("forecast_days", 1)
-                if(request.currentDayRequested) {
-                    parameter("current", request.params)
+                parameter("latitude", request.latitude)
+                parameter("longitude", request.longitude)
+                parameter("forecast_days", request.forecastDays)
+                if (request.currentDayRequested) {
+                    val parsedRequest = request.params.toString().replace(Regex("[\\[\\] ]"), "")
+                    parameter("current", parsedRequest)
                 }
                 parameter(Constants.TEMPERATURE_UNIT, request.temperatureUnit)
-                parameter("hourly", "temperature_2m")
-                parameter("hourly", "relativehumidity_2m")
-                parameter("hourly", "dewpoint_2m")
+                if (request.isHourlyDataRequested) {
+                    parameter("hourly", "temperature_2m")
+                    parameter("hourly", "relativehumidity_2m")
+                    parameter("hourly", "dewpoint_2m")
+                }
+
+                parameter(
+                    key = Constants.DAILY,
+                    value = listOf(
+                        Constants.TEMPERATURE_2M_MAX,
+                        Constants.TEMPERATURE_2M_MIN,
+                        Constants.PRECIPITATION_SUM,
+                        Constants.PRECIPITATION_HOURS,
+                    ).toString().replace(Regex("[\\[\\] ]"), "")
+                )
+                parameter(Constants.TIME_ZONE, "Asia/Singapore")
             }
             val result = responseProcessor.getResultFromResponse<WeatherResponse>(gson, response)
             result
