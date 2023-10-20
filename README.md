@@ -84,7 +84,7 @@ https://drive.google.com/file/d/11Q_j8K_mQI8fsHnHib5gTmrk3UzfIj9I/view
 # LICENSE
 
 ```
-   Copyright 2023 David Odari
+   Copyright 2023 Mahmood Ahmad
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
