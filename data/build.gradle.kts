@@ -59,4 +59,9 @@ dependencies {
     implementation(libs.hilt.android.gradle.plugin)
     implementation(libs.datastore.preferences)
 
+    implementation(libs.room.ktx)
+    implementation(libs.room.runtime)
+    implementation(libs.datastore.preferences)
+
+
 }

@@ -97,14 +97,11 @@ dependencies {
     implementation(libs.navigation.compose)
 
 
-    implementation(libs.room.ktx)
-    implementation(libs.room.runtime)
     kapt(libs.room.compiler)
     implementation(libs.room.paging)
     implementation(libs.paging.runtime)
     implementation(libs.paging.compose)
     implementation(libs.landscapist.glide)
-    implementation(libs.datastore.preferences)
 
 
     implementation(libs.kotlin.serialization)
