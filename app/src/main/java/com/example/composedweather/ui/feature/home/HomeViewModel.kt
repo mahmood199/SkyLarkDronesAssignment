@@ -3,19 +3,19 @@ package com.example.composedweather.ui.feature.home
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.composedweather.connection.NetworkConnectivityObserver
-import com.example.composedweather.core.remote.NetworkResult
-import com.example.composedweather.data.models.request.Constants
-import com.example.composedweather.data.models.response.Current
-import com.example.composedweather.data.models.response.CurrentUnits
-import com.example.composedweather.data.models.response.Daily
-import com.example.composedweather.data.models.response.DailyUnits
-import com.example.composedweather.data.models.response.DailyForecast
-import com.example.composedweather.data.models.response.Hourly
-import com.example.composedweather.data.models.response.HourlyForecast
-import com.example.composedweather.data.models.response.HourlyUnits
-import com.example.composedweather.data.repository.contract.UserPreferenceRepository
-import com.example.composedweather.data.repository.contract.WeatherRepository
+import com.example.connectivity.NetworkConnectivityObserver
+import com.example.core_network.NetworkResult
+import com.example.data.model.request.Constants
+import com.example.data.model.response.Current
+import com.example.data.model.response.CurrentUnits
+import com.example.data.model.response.Daily
+import com.example.data.model.response.DailyForecast
+import com.example.data.model.response.DailyUnits
+import com.example.data.model.response.Hourly
+import com.example.data.model.response.HourlyForecast
+import com.example.data.model.response.HourlyUnits
+import com.example.domain.user.UserPreferencesUseCase
+import com.example.domain.weather.WeatherInfoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,8 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val networkConnectivityObserver: NetworkConnectivityObserver,
-    private val weatherRepository: WeatherRepository,
-    private val userPreferenceRepository: UserPreferenceRepository
+    private val weatherInfoUseCase: WeatherInfoUseCase,
+    private val userPreferencesUseCase: UserPreferencesUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeViewState())
@@ -51,7 +51,7 @@ class HomeViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            userPreferenceRepository.getUserPreferences().distinctUntilChanged().collectLatest {
+            userPreferencesUseCase.getUserPreferences().distinctUntilChanged().collectLatest {
                 val request = _state.value.weatherDataRequest
 
                 _state.value = _state.value.copy(
@@ -92,7 +92,7 @@ class HomeViewModel @Inject constructor(
     private fun getInfo() {
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = _state.value.copy(isLoading = true)
-            when (val result = weatherRepository.getInfo(state.value.weatherDataRequest)) {
+            when (val result = weatherInfoUseCase.getInfo(state.value.weatherDataRequest)) {
                 is NetworkResult.Exception -> {
                     handleError(result.e)
                 }
@@ -164,13 +164,13 @@ class HomeViewModel @Inject constructor(
 
     fun modifyState(state: HomeViewState) {
         viewModelScope.launch(Dispatchers.IO) {
-            userPreferenceRepository.setTemperatureUnit(state.weatherDataRequest.temperatureUnit)
+            userPreferencesUseCase.setTemperatureUnit(state.weatherDataRequest.temperatureUnit)
         }
     }
 
     fun setLocationCoordinates(latitude: Double, longitude: Double) {
         viewModelScope.launch(Dispatchers.IO) {
-            userPreferenceRepository.setUserLocation(
+            userPreferencesUseCase.setUserLocation(
                 latitude = latitude,
                 longitude = longitude,
                 location = "Your current location",

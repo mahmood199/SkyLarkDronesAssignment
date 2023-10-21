@@ -21,4 +21,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "ComposedWeather"
 include(":app")
- 
+include(":core-network")
+include(":core-local")
+include(":connectivity-android")
+include(":data")
+include(":domain")

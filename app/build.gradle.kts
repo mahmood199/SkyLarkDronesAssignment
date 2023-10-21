@@ -3,11 +3,6 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.hilt.plugin)
-/*
-    id("kotlin-parcelize")
-    id("kotlin-android")
-    id("kotlinx-serialization")
-*/
     id("kotlin-kapt")
 }
 
@@ -26,9 +21,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
-        buildConfigField("String", "OPEN_METEO_BASE_URL", "\"https://api.open-meteo.com/v1/\"")
-        buildConfigField("String", "NOMINATIM_BASE_URL", "\"https://nominatim.openstreetmap.org/\"")
     }
 
     signingConfigs {
@@ -45,7 +37,6 @@ android {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
             )
         }
     }
@@ -74,6 +65,13 @@ android {
 }
 
 dependencies {
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.aar", "*.jar"))))
+
+    implementation(project(":core-network"))
+    implementation(project(":core-local"))
+    implementation(project(":connectivity-android"))
+    implementation(project(":data"))
+    implementation(project(":domain"))
 
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
@@ -85,24 +83,16 @@ dependencies {
     implementation(libs.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.espresso.core)
-    androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(platform(libs.compose.bom))
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
 
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.android)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.ktor.client.logging)
-    implementation(libs.ktor.gson)
-    implementation(libs.ktor.client.serialization)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.client.encoding)
 
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+    implementation(libs.hilt.android.gradle.plugin)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.navigation.compose)
 
@@ -117,9 +107,7 @@ dependencies {
     implementation(libs.datastore.preferences)
 
 
-    implementation(libs.hilt.android.gradle.plugin)
     implementation(libs.kotlin.serialization)
-    implementation(libs.brotli.dec)
 
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
