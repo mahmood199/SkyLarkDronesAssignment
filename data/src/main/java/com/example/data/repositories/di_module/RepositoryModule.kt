@@ -1,6 +1,7 @@
 package com.example.data.repositories.di_module
 
 import com.example.data.local.PreferencesDataStore
+import com.example.data.remote.IssuesRemoteDataSource
 import com.example.data.remote.LocationRemoteDataSource
 import com.example.data.remote.RepositorySearchRemoteDataSource
 import com.example.data.remote.WeatherRemoteDataSource
@@ -55,10 +56,12 @@ class RepositoryModule {
     @Provides
     @Singleton
     fun provideProjectSearchRepository(
-        remoteDataSource: RepositorySearchRemoteDataSource,
+        searchRemoteDataSource: RepositorySearchRemoteDataSource,
+        issuesRemoteDataSource: IssuesRemoteDataSource
     ): ProjectsRepository {
         return ProjectRepositoryImpl(
-            remoteDataSource = remoteDataSource
+            repositorySearchDataSource = searchRemoteDataSource,
+            repositoryIssuesDataSource = issuesRemoteDataSource
         )
     }
 
