@@ -4,8 +4,10 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.composedweather.ui.Arguments
 import com.example.core_network.NetworkResult
 import com.example.data.model.response.Issue
+import com.example.data.model.response.Item
 import com.example.domain.issues.GetIssuesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,12 +25,18 @@ class RepositoriesIssuesViewModel @Inject constructor(
     private val _state = MutableStateFlow(RepositoryIssuesViewState())
     val state = _state.asStateFlow()
 
-    val issuesUrl = savedStateHandle.get<String>("issues_id") ?: ""
+    private val issuesUrl = savedStateHandle.get<String>("issues_id") ?: ""
+    private var item = savedStateHandle.get<Item>(Arguments.repositoryItem)
 
     var issues = mutableStateListOf<Issue>()
 
     init {
+        setTitle()
         getAllIssues()
+    }
+
+    private fun setTitle() {
+        _state.value = _state.value.copy(toolbarText = issuesUrl, item = item)
     }
 
     private fun getAllIssues() {

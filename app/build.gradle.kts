@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.hilt.plugin)
     id("kotlin-kapt")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -112,5 +113,7 @@ dependencies {
 
     implementation(libs.play.services.location)
     implementation(libs.accompanist.permissions)
+
+    implementation(libs.kotlin.parcelize.runtime)
 
 }

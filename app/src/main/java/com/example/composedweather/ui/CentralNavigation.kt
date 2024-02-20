@@ -16,6 +16,7 @@ import com.example.composedweather.ui.feature.repository_search.RepositorySearch
 import com.example.composedweather.ui.feature.search.DetailUI
 import com.example.composedweather.ui.feature.splash.SplashUI
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
+import com.example.data.model.response.Item
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -76,29 +77,27 @@ fun CentralNavigation(
                     navController.popBackStack()
                 },
                 navigateToViewIssues = {
-                    Log.d("CentralNavigation", it.issuesUrl)
                     val suffixRemoved = it.issuesUrl.replace("{/number}", "")
-                    Log.d("CentralNavigation", suffixRemoved)
                     val encodedUrl = URLEncoder.encode(suffixRemoved, StandardCharsets.UTF_8.toString())
-                    Log.d("CentralNavigation", encodedUrl)
                     navController.navigate(
-                        route = Screen.RepositoryIssues.getPathWthId(id = encodedUrl),
+                        route = Screen.RepositoryIssues.getPathWthId(id = encodedUrl).plus("/"),
                     )
                 }
             )
         }
 
         composable(
-            route = Screen.RepositoryIssues.getPath(),
+            route = Screen.RepositoryIssues.getPath2(),
             arguments = listOf(
                 navArgument(name = Arguments.issueId) {
                     type = NavType.StringType
+                },
+                navArgument(name = Arguments.repositoryItem) {
+                    type = NavType.ParcelableType(Item::class.java)
                 }
             )
         ) {
-            val passedUrl = it.arguments?.getString(Arguments.issueId) ?: ""
             RepositoryIssuesUIContainer(
-                passedUrl = passedUrl,
                 onBackPressed = {
                     navController.popBackStack()
                 },

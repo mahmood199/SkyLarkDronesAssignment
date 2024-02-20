@@ -20,11 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.composedweather.ui.common.ComposedWeatherAppBarUI
 import com.example.data.model.response.Issue
 
 @Composable
 fun RepositoryIssuesUIContainer(
-    passedUrl: String,
     onBackPressed: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RepositoriesIssuesViewModel = hiltViewModel()
@@ -46,6 +46,20 @@ fun RepositoryIssuesUIContainer(
             .fillMaxSize()
             .systemBarsPadding()
     ) {
+        item(key = "Toolbar") {
+            ComposedWeatherAppBarUI(
+                title = state.toolbarText,
+                onBackPressed = onBackPressed
+            )
+        }
+
+        item(key = "RepoItem") {
+            if (state.item != null) {
+                Column {
+                    Text(text = state.item.toString())
+                }
+            }
+        }
 
         items(
             count = issues.size,

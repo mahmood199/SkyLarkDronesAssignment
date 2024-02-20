@@ -1,8 +1,10 @@
 package com.example.data.model.response
 
+import android.os.Parcelable
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
-
+@Parcelize
 data class Item(
     @SerializedName("allow_forking") val allowForking: Boolean,
     @SerializedName("archive_url") val archiveUrl: String,
@@ -82,4 +84,4 @@ data class Item(
     @SerializedName("watchers") val watchers: Int,
     @SerializedName("watchers_count") val watchersCount: Int,
     @SerializedName("web_commit_signoff_required") val webCommitSignoffRequired: Boolean
-)
+) : Parcelable

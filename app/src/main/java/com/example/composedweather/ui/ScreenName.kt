@@ -1,5 +1,7 @@
 package com.example.composedweather.ui
 
+import com.example.data.model.response.Item
+
 
 object ScreenName {
     const val HOME = "home"
@@ -13,6 +15,7 @@ object ScreenName {
 
 object Arguments {
     const val issueId = "issues_id"
+    const val repositoryItem = "repository_item"
 }
 
 sealed class Screen(val name: String) {
@@ -27,6 +30,14 @@ sealed class Screen(val name: String) {
         }
         fun getPathWthId(id: String): String {
             return ScreenName.REPOSITORY_ISSUES.plus("/${id}")
+        }
+
+        fun getPath2(): String {
+            return ScreenName.REPOSITORY_ISSUES.plus("/{${Arguments.repositoryItem}}")
+        }
+
+        fun getPathWithObject(it: Item): String {
+            return ScreenName.REPOSITORY_ISSUES.plus("/${it}")
         }
     }
 }
