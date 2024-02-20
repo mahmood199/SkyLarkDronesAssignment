@@ -2,11 +2,14 @@ package com.example.data.repositories.di_module
 
 import com.example.data.local.PreferencesDataStore
 import com.example.data.remote.LocationRemoteDataSource
+import com.example.data.remote.RepositorySearchRemoteDataSource
 import com.example.data.remote.WeatherRemoteDataSource
 import com.example.data.repositories.contract.LocationRepository
+import com.example.data.repositories.contract.ProjectsRepository
 import com.example.data.repositories.contract.UserPreferenceRepository
 import com.example.data.repositories.contract.WeatherRepository
 import com.example.data.repositories.implementation.LocationRepositoryImpl
+import com.example.data.repositories.implementation.ProjectRepositoryImpl
 import com.example.data.repositories.implementation.UserPreferenceRepositoryImpl
 import com.example.data.repositories.implementation.WeatherRepositoryImpl
 import dagger.Module
@@ -48,5 +51,16 @@ class RepositoryModule {
             remoteDataSource = remoteDataSource
         )
     }
+
+    @Provides
+    @Singleton
+    fun provideProjectSearchRepository(
+        remoteDataSource: RepositorySearchRemoteDataSource,
+    ): ProjectsRepository {
+        return ProjectRepositoryImpl(
+            remoteDataSource = remoteDataSource
+        )
+    }
+
 
 }

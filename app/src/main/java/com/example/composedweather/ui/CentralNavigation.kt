@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.composedweather.ui.feature.home.HomeUI
+import com.example.composedweather.ui.feature.repository_search.RepositorySearchUIContainer
 import com.example.composedweather.ui.feature.search.DetailUI
 import com.example.composedweather.ui.feature.splash.SplashUI
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
@@ -21,7 +22,7 @@ fun CentralNavigation(
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Splash.name,
+        startDestination = Screen.RepositorySearch.name,
         modifier = modifier
     ) {
         composable(route = Screen.Splash.name) {
@@ -63,6 +64,16 @@ fun CentralNavigation(
             })
         }
 
+        composable(route = Screen.RepositorySearch.name) {
+            RepositorySearchUIContainer(
+                onBackPressed = {
+                    navController.popBackStack()
+                },
+                navigateToViewIssues = {
+                    navController.navigate(Screen.RepositoryIssues.name)
+                }
+            )
+        }
 
     }
 
