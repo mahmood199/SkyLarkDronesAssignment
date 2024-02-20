@@ -24,6 +24,17 @@ class RepositorySearchViewModel @Inject constructor(
     private val _query = MutableStateFlow("")
     val uiQuery = _query.asStateFlow()
 
+    init {
+        mock()
+    }
+
+    private fun mock() {
+        viewModelScope.launch {
+            updateSearchQuery("Hello")
+            searchRepositories()
+        }
+    }
+
     var searchResults = mutableStateListOf<Item>()
 
     fun updateSearchQuery(it: String) {
@@ -34,7 +45,7 @@ class RepositorySearchViewModel @Inject constructor(
         _state.value = _state.value.copy(isInSearchMode = false)
     }
 
-    fun searchLocation() {
+    fun searchRepositories() {
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = _state.value.copy(isLoading = true)
             when (val result = repositoriesByStarsUseCase.getProjects(_query.value)) {

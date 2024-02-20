@@ -1,18 +1,23 @@
 package com.example.composedweather.ui
 
+import android.util.Log
 import androidx.compose.animation.fadeIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.composedweather.ui.feature.home.HomeUI
 import com.example.composedweather.ui.feature.issues.RepositoryIssuesUIContainer
 import com.example.composedweather.ui.feature.repository_search.RepositorySearchUIContainer
 import com.example.composedweather.ui.feature.search.DetailUI
 import com.example.composedweather.ui.feature.splash.SplashUI
 import com.example.composedweather.ui.theme.ComposedWeatherTheme
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun CentralNavigation(
@@ -71,13 +76,29 @@ fun CentralNavigation(
                     navController.popBackStack()
                 },
                 navigateToViewIssues = {
-                    navController.navigate(Screen.RepositoryIssues.name)
+                    Log.d("CentralNavigation", it.issuesUrl)
+                    val suffixRemoved = it.issuesUrl.replace("{/number}", "")
+                    Log.d("CentralNavigation", suffixRemoved)
+                    val encodedUrl = URLEncoder.encode(suffixRemoved, StandardCharsets.UTF_8.toString())
+                    Log.d("CentralNavigation", encodedUrl)
+                    navController.navigate(
+                        route = Screen.RepositoryIssues.getPathWthId(id = encodedUrl),
+                    )
                 }
             )
         }
 
-        composable(route = Screen.RepositoryIssues.name) {
+        composable(
+            route = Screen.RepositoryIssues.getPath(),
+            arguments = listOf(
+                navArgument(name = Arguments.issueId) {
+                    type = NavType.StringType
+                }
+            )
+        ) {
+            val passedUrl = it.arguments?.getString(Arguments.issueId) ?: ""
             RepositoryIssuesUIContainer(
+                passedUrl = passedUrl,
                 onBackPressed = {
                     navController.popBackStack()
                 },
