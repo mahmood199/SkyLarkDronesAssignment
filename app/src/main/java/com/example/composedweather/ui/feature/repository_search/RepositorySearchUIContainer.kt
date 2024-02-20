@@ -293,11 +293,19 @@ fun RepositoryItem(
             overflow = TextOverflow.Ellipsis
         )
         Text(
-            text = item.name,
+            text = "Stars : ${item.stargazersCount}",
             modifier = Modifier.fillMaxWidth()
         )
         Text(
             text = "Clone Url: ${item.cloneUrl}",
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        val issuesUrlToShow = remember {
+            item.issuesUrl.replace("{/number}", "")
+        }
+        Text(
+            text = "Issues Url: $issuesUrlToShow",
             modifier = Modifier.fillMaxWidth()
         )
     }
